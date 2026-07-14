@@ -12,63 +12,121 @@ def home(request):
     return render(request, 'home.html')
 
 def new_registration(request):
+
     if request.method == "POST":
 
-        full_name = request.POST.get("full_name", "").strip()
+        # Remove extra spaces
+        full_name = " ".join(
+            request.POST.get("full_name", "").strip().split()
+        )
+
         document = request.FILES.get("document")
 
+
         if not full_name:
-            messages.error(request, "Full name is required.")
+            messages.error(
+                request,
+                "Full name is required."
+            )
             return redirect("new-registration")
+
 
         if not document:
-            messages.error(request, "Please upload your supporting document.")
+            messages.error(
+                request,
+                "Please upload your supporting document."
+            )
             return redirect("new-registration")
 
+
+        # Check existing application
         existing = Residents.objects.filter(
-            full_name__iexact=full_name,
-            document_type=Residents.DocumentType.NEW_REGISTRATION
+            full_name__iexact=full_name
         ).first()
 
+
         if existing:
+
             if existing.status == Residents.Status.PENDING:
+
                 messages.error(
                     request,
-                    "You already have a pending New Registration application."
+                    "You already have a pending application."
                 )
-                return redirect("already_registered", existing.id)
+                return redirect(
+                    "already_registered",
+                    existing.id
+                )
+
 
             elif existing.status == Residents.Status.PRE_APPROVED:
+
+                messages.error(
+                    request,
+                    "Your application is already pre-approved."
+                )
+                return redirect(
+                    "already_registered",
+                    existing.id
+                )
+
+
+            elif existing.status == Residents.Status.APPROVED:
+
                 messages.error(
                     request,
                     "You are already registered as a voter."
                 )
-                return redirect("already_registered", existing.id)
+                return redirect(
+                    "already_registered",
+                    existing.id
+                )
+
 
             elif existing.status == Residents.Status.DUPLICATION:
+
                 messages.error(
                     request,
-                    "Your application was marked as a duplicate record."
+                    "Your record already exists as a duplicate."
                 )
-                return redirect("already_registered", existing.id)
-            
-            elif existing.status == Residents.Status.APPROVED:
-                messages.error(
-                    request,
-                    "Your application was marked as a duplicate record."
+                return redirect(
+                    "already_registered",
+                    existing.id
                 )
 
-            # If REJECTED, continue and allow a new application
 
+            elif existing.status == Residents.Status.REJECTED:
+
+                # Allow rejected applicants to submit again
+                pass
+
+
+
+        # Create new application
         resident = Residents.objects.create(
             full_name=full_name,
             document_type=Residents.DocumentType.NEW_REGISTRATION,
             document=document,
+            status=Residents.Status.PENDING
         )
 
-        return redirect("success", resident.id)
 
-    return render(request, "pages/new-registration.html")
+        messages.success(
+            request,
+            "Your registration application was submitted successfully."
+        )
+
+
+        return redirect(
+            "success",
+            resident.id
+        )
+
+
+    return render(
+        request,
+        "pages/new-registration.html"
+    )
 
 def transfer(request):
     if request.method == "POST":

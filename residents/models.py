@@ -91,5 +91,23 @@ class Residents(models.Model):
 
         super().save(*args, **kwargs)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "full_name",
+                    "document_type"
+                ],
+                condition=models.Q(
+                    status__in=[
+                        "pending",
+                        "pre-approved",
+                        "approved"
+                    ]
+                ),
+                name="unique_active_resident_application"
+            )
+        ]
+
     def __str__(self):
         return f"{self.tracking_number} - {self.full_name}"
