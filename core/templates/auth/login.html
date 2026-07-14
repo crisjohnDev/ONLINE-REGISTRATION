@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    
+    <!-- Login Card -->
+    <div class="max-w-md w-full bg-white border border-gray-200 shadow-xl rounded-2xl p-8">
+        
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-50 border border-blue-100 text-blue-800 mb-4">
+                <i class="fa-solid fa-user-shield text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-black tracking-tight text-gray-900">Municipal Administrator</h2>
+            <p class="text-xs text-gray-500 mt-1">Authorized COMELEC Portal Access Only</p>
+        </div>
+
+        <!-- Error Alert (If login fails) -->
+        {% if error or form.errors %}
+        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl flex gap-3 text-left">
+            <i class="fa-solid fa-triangle-exclamation text-red-500 text-sm mt-0.5"></i>
+            <div>
+                <h4 class="text-xs font-bold text-red-950">Authentication Failed</h4>
+                <p class="text-[11px] text-red-800 mt-0.5">
+                    {% if error %}
+                        {{ error }}
+                    {% else %}
+                        Invalid username or password. Please try again.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Username Field -->
+            <div class="space-y-2">
+                <label for="username" class="block text-xs font-bold uppercase tracking-wide text-gray-700">Username</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm">
+                        <i class="fa-solid fa-user-lock"></i>
+                    </span>
+                    <input 
+                        type="text" 
+                        name="username" 
+                        id="username"
+                        required 
+                        placeholder="Enter your administrator username"
+                        class="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800 transition"
+                    >
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="space-y-2">
+                <label for="password" class="block text-xs font-bold uppercase tracking-wide text-gray-700">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm">
+                        <i class="fa-solid fa-key"></i>
+                    </span>
+                    <input 
+                        type="password" 
+                        name="password" 
+                        id="password"
+                        required 
+                        placeholder="••••••••"
+                        class="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800 transition"
+                    >
+                </div>
+            </div>
+
+            <!-- Login Button -->
+            <button 
+                type="submit" 
+                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-800 hover:bg-blue-900 text-white font-extrabold text-sm tracking-wide uppercase rounded-xl shadow transition duration-150 transform hover:-translate-y-0.5"
+            >
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In
+            </button>
+        </form>
+
+        <!-- Security Disclaimer Footer -->
+        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+            <span class="text-[10px] text-gray-400 font-semibold tracking-wider uppercase block">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i> Security Notice
+            </span>
+            <p class="text-[10px] text-gray-400 mt-1 max-w-xs mx-auto">
+                All logins and modifications are logged and monitored. Unauthorized access attempts will be blocked.
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

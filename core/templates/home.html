@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+        <div class="text-center mb-10">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-blue-800 mb-2">Available Transactions</h3>
+            <div class="h-1 w-12 bg-amber-500 mx-auto rounded"></div>
+        </div>
+
+        <!-- Buttons Formulated as Action Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- 1. Voter Registration -->
+            <a href="{% url 'new-registration' %}" class="group bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition-all duration-200 flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center text-xl font-bold mb-4 group-hover:bg-blue-800 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-blue-900 mb-2">Voter Registration</h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">For first-time voters or new residents applying to vote in Pio Duran.</p>
+                </div>
+                <div class="mt-6 flex items-center text-sm font-semibold text-blue-800 group-hover:text-blue-900">
+                    Apply Now <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- 2. Transfer Registration -->
+            <a href="{% url 'transfer' %}" class="group bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition-all duration-200 flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center text-xl font-bold mb-4 group-hover:bg-blue-800 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-right-left"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-blue-900 mb-2">Transfer of Registration</h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">Transfer your voter record from another municipality or change your precinct within Pio Duran.</p>
+                </div>
+                <div class="mt-6 flex items-center text-sm font-semibold text-blue-800 group-hover:text-blue-900">
+                    Request Transfer <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- 3. Reactivation of Record -->
+            <a href="{% url 'reactivation' %}" class="group bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition-all duration-200 flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center text-xl font-bold mb-4 group-hover:bg-blue-800 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-blue-900 mb-2">Reactivation of Record</h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">Restore your active status if your registration was deactivated due to missing past elections.</p>
+                </div>
+                <div class="mt-6 flex items-center text-sm font-semibold text-blue-800 group-hover:text-blue-900">
+                    Reactivate Record <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- 4. Change Name -->
+            <a href="{% url 'update' %}" class="group bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition-all duration-200 flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center text-xl font-bold mb-4 group-hover:bg-blue-800 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-signature"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-blue-900 mb-2">Change of Name / Corrections</h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">Update your legal name due to marriage or court order, or fix typos in your existing record.</p>
+                </div>
+                <div class="mt-6 flex items-center text-sm font-semibold text-blue-800 group-hover:text-blue-900">
+                    Update Details <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- 5. Reinstatement -->
+            <a href="{% url 'reinstatement' %}" class="group bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition-all duration-200 flex flex-col justify-between lg:col-span-1 md:col-span-2 lg:max-w-none">
+                <div>
+                    <div class="w-12 h-12 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center text-xl font-bold mb-4 group-hover:bg-blue-800 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-blue-900 mb-2">Reinstatement</h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">Request to return your name to the official voter list if it was erroneously excluded.</p>
+                </div>
+                <div class="mt-6 flex items-center text-sm font-semibold text-blue-800 group-hover:text-blue-900">
+                    File Reinstatement <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+        </div>
+{% endblock %}

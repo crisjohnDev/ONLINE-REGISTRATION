@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center py-6">
+    <!-- Status Card -->
+    <div class="max-w-2xl w-full bg-white border border-gray-200 shadow-lg rounded-2xl p-8 md:p-12 text-center">
+        
+        <!-- Icon indicating in-progress status -->
+        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-amber-50 border border-amber-100 text-amber-500 mb-6">
+            <i class="fa-solid fa-user-clock text-5xl"></i>
+        </div>
+
+        <!-- Copy Details -->
+        <h2 class="text-3xl font-black tracking-tight text-gray-900 mb-2">Application Already Exists</h2>
+        <p class="text-gray-600 text-sm max-w-md mx-auto mb-8">
+            Our records indicate that you have an existing application currently undergoing verification. Duplicate submissions for the same registration profile are restricted to prevent record conflicts.
+        </p>
+
+        <!-- Existing Application Details Box -->
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 max-w-md mx-auto mb-8 text-left space-y-3">
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Active Request Details</span>
+            
+            <div class="flex justify-between items-center border-b border-gray-200 pb-2.5">
+                <span class="text-xs text-gray-500 font-semibold">Applicant Name:</span>
+                <span class="text-xs font-bold text-gray-800">{{ resident.full_name }}</span>
+            </div>
+
+            <div class="flex justify-between items-center border-b border-gray-200 pb-2.5">
+                <span class="text-xs text-gray-500 font-semibold">Reference Code:</span>
+                <span class="font-mono text-xs font-bold text-blue-900 uppercase">
+                    {{ resident.tracking_number }}
+                </span>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <span class="text-xs text-gray-500 font-semibold">
+                    Current Status:
+                </span>
+
+                <span class="
+                    px-2.5 py-1 text-[10px] font-extrabold rounded-full uppercase tracking-wide
+
+                    {% if resident.status == 'pending' %}
+                        bg-amber-100 text-amber-800
+
+                    {% elif resident.status == 'approved' %}
+                        bg-green-100 text-green-800
+
+                    {% elif resident.status == 'rejected' %}
+                        bg-red-100 text-red-800
+
+                    {% elif resident.status == 'duplication' %}
+                        bg-purple-100 text-purple-800
+                    {% endif %}
+                ">
+                    {{ resident.get_status_display }}
+                </span>
+            </div>
+
+            <!-- Status Message -->
+            <div class="mt-4">
+                {% if resident.status == 'pending' %}
+                    <p class="text-sm text-amber-700">
+                        Your application has already been submitted and is currently under review by the Municipal Election Officer.
+                    </p>
+
+                {% elif resident.status == 'approved' %}
+                    <p class="text-sm text-green-700">
+                        Your voter registration application has already been approved.
+                    </p>
+
+                {% elif resident.status == 'rejected' %}
+                    <p class="text-sm text-red-700">
+                        Your application has been rejected.
+                        {% if resident.remarks %}
+                            <br><strong>Remarks:</strong> {{ resident.remarks }}
+                        {% endif %}
+                    </p>
+
+                {% elif resident.status == 'duplication' %}
+                    <p class="text-sm text-purple-700">
+                        Your previous application was marked as a duplicate record. Please contact the Municipal Election Office for assistance.
+                        {% if resident.remarks %}
+                            <br><strong>Remarks:</strong> {{ resident.remarks }}
+                        {% endif %}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Advisory Alert -->
+        <div class="max-w-md mx-auto text-left mb-8 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-xl">
+            <div class="flex gap-2.5">
+                <i class="fa-solid fa-circle-info text-blue-500 text-sm mt-0.5"></i>
+                <div>
+                    <h4 class="text-xs font-bold text-blue-950">Need to make updates?</h4>
+                    <p class="text-[11px] text-blue-800 mt-0.5 leading-normal">
+                        If you uploaded incorrect requirements or made errors on your form, please do not file a new record. Contact the local Pio Duran Election Office directly to update your current queue ticket.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Services Action Button -->
+        <div class="flex justify-center">
+            <a 
+                href="/" 
+                class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-blue-800 hover:bg-blue-900 text-white font-extrabold text-sm tracking-wide uppercase rounded-xl transition shadow-md w-full sm:w-auto"
+            >
+                <i class="fa-solid fa-house"></i> Back to Services
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

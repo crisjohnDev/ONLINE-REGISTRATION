@@ -1,0 +1,425 @@
+{% extends "admin.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Context -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Voter Registration Lifecycle</h3>
+            <p class="text-xs text-gray-500 mt-1">Track voters through the complete pipeline: from initial submission to biometric completion.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse"></span>
+                {{ pending_count }} Pending Review
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>
+                {{ pre_approved_count }} Awaiting Thumbmark
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+                {{ approved_count }} Fully Registered
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>
+                {{ rejected_count }} Rejected / Duplicate
+            </span>
+        </div>
+    </div>
+
+    <!-- PIPELINE STAGE 1: PENDING VERIFICATION -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+                <h4 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-amber-500"></i> 1. Pending Verification Queue
+                </h4>
+                <p class="text-[11px] text-gray-500">Initial document inspection and digital data verification phase.</p>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                    <tr class="bg-gray-50 text-[10px] font-bold tracking-wider uppercase text-gray-500 border-b border-gray-200">
+                        <th class="px-6 py-3.5">Resident Full Name</th>
+                        <th class="px-6 py-3.5">Submitted Documents</th>
+                        <th class="px-6 py-3.5">Submission Date</th>
+                        <th class="px-6 py-3.5 text-right">Verification Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+
+                {% for resident in pending %}
+
+                <tr class="hover:bg-gray-50/50">
+
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+
+                            <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-700 font-bold text-xs flex items-center justify-center border border-amber-100">
+                                {{ resident.full_name|slice:":1"|upper }}
+                            </div>
+
+                            <div>
+                                <p class="font-bold text-gray-900">
+                                    {{ resident.full_name }}
+                                </p>
+
+                                <span class="text-[10px] text-gray-400">
+                                    {{ resident.tracking_number }}
+                                </span>
+                            </div>
+
+                        </div>
+                    </td>
+
+                    <td class="px-6 py-4">
+
+                        {% if resident.document %}
+                        <a
+                            href="{{ resident.document.url }}"
+                            target="_blank"
+                            class="text-blue-600 hover:underline"
+                        >
+                            View Document
+                        </a>
+                        {% endif %}
+
+                    </td>
+
+                    <td class="px-6 py-4 text-xs">
+                        {{ resident.created_at|date:"F d, Y h:i A" }}
+                    </td>
+
+                    <td class="px-6 py-4 text-right">
+
+                        <a
+                            href="{% url 'pre_approve' resident.id %}"
+                            class="inline-flex items-center px-3 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-bold"
+                        >
+                            <i class="fa-solid fa-check mr-2"></i>
+                            Pre-Approve
+                        </a>
+
+                        <a
+                            href="{% url 'reject_registration' resident.id %}"
+                            class="inline-flex items-center px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold"
+                        >
+                            <i class="fa-solid fa-circle-xmark mr-2"></i>
+                            Reject
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="4" class="py-8 text-center text-gray-400">
+                        No pending applications.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PIPELINE STAGE 2: APPROVED & AWAITING BIOMETRICS -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+                <h4 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-fingerprint text-blue-600"></i> 2. Approved & Awaiting Thumbmark
+                </h4>
+                <p class="text-[11px] text-gray-500">Documents verified. Residents must appear physically at the office to capture their biometrics.</p>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                    <tr class="bg-gray-50 text-[10px] font-bold tracking-wider uppercase text-gray-500 border-b border-gray-200">
+                        <th class="px-6 py-3.5">Resident Full Name</th>
+                        <th class="px-6 py-3.5">Verified Documents</th>
+                        <th class="px-6 py-3.5">Biometric Status</th>
+                        <th class="px-6 py-3.5 text-right">Biometric Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+
+                {% for resident in pre_approved %}
+
+                <tr class="hover:bg-gray-50/50">
+
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+
+                            <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-700 font-bold text-xs flex items-center justify-center border border-amber-100">
+                                {{ resident.full_name|slice:":1"|upper }}
+                            </div>
+
+                            <div>
+                                <p class="font-bold text-gray-900">
+                                    {{ resident.full_name }}
+                                </p>
+
+                                <span class="text-[10px] text-gray-400">
+                                    {{ resident.tracking_number }}
+                                </span>
+                            </div>
+
+                        </div>
+                    </td>
+
+                    <td class="px-6 py-4">
+
+                        {% if resident.document %}
+                        <a
+                            href="{{ resident.document.url }}"
+                            target="_blank"
+                            class="text-blue-600 hover:underline"
+                        >
+                            View Document
+                        </a>
+                        {% endif %}
+
+                    </td>
+
+                    <td class="px-6 py-4 text-xs">
+                        {{ resident.created_at|date:"F d, Y h:i A" }}
+                    </td>
+
+                    <td class="px-6 py-4 text-right">
+
+                        <a
+                            href="{% url 'capture_thumbmark' resident.id %}"
+                            class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold"
+                        >
+                            <i class="fa-solid fa-fingerprint mr-2"></i>
+                            Capture Thumbmark
+                        </a>
+
+                        <a
+                            href="{% url 'reject_registration' resident.id %}"
+                            class="inline-flex items-center px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold"
+                        >
+                            <i class="fa-solid fa-circle-xmark mr-2"></i>
+                            Reject
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="4" class="py-8 text-center text-gray-400">
+                        No pending applications.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PIPELINE STAGE 3: FULLY REGISTERED RESIDENTS -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+                <h4 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i> 3. Completed Registrations (New Residents)
+                </h4>
+                <p class="text-[11px] text-gray-500">Voters who have completed documents, approval validation, and full biometric sign-off.</p>
+            </div>
+            <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded border border-emerald-200 uppercase tracking-wider">Active Voter Roster</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                    <tr class="bg-gray-50 text-[10px] font-bold tracking-wider uppercase text-gray-500 border-b border-gray-200">
+                        <th class="px-6 py-3.5">New Registered Resident</th>
+                        <th class="px-6 py-3.5">Biometric Reference</th>
+                        <th class="px-6 py-3.5">Completion Date</th>
+                        <th class="px-6 py-3.5">Status</th>
+                        <th class="px-6 py-3.5 text-right">Records</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+
+                {% for resident in approved %}
+
+                <tr class="hover:bg-gray-50/50">
+
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+
+                            <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-700 font-bold text-xs flex items-center justify-center border border-amber-100">
+                                {{ resident.full_name|slice:":1"|upper }}
+                            </div>
+
+                            <div>
+                                <p class="font-bold text-gray-900">
+                                    {{ resident.full_name }}
+                                </p>
+
+                                <span class="text-[10px] text-gray-400">
+                                    {{ resident.tracking_number }}
+                                </span>
+                            </div>
+
+                        </div>
+                    </td>
+
+                    <td class="px-6 py-4">
+
+                        {% if resident.document %}
+                        <a
+                            href="{{ resident.document.url }}"
+                            target="_blank"
+                            class="text-blue-600 hover:underline"
+                        >
+                            View Document
+                        </a>
+                        {% endif %}
+
+                    </td>
+
+                    <td class="px-6 py-4 text-xs">
+                        {{ resident.created_at|date:"F d, Y h:i A" }}
+                    </td>
+
+                    <td class="px-6 py-4 text-right">
+
+                        <a href="#"
+                        class="px-3 py-1 bg-red-600 text-white rounded">
+                            Reject
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="4" class="py-8 text-center text-gray-400">
+                        No pending applications.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PIPELINE STAGE 4: REJECTED / DUPLICATE -->
+    <div class="bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden">
+
+        <div class="p-4 border-b border-red-100 bg-red-50 flex justify-between items-center">
+
+            <div>
+                <h4 class="text-sm font-bold text-red-800 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    4. Rejected / Duplicate Applications
+                </h4>
+
+                <p class="text-[11px] text-red-600">
+                    Applications that were rejected or marked as duplicate.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full">
+
+                <thead>
+
+                    <tr class="bg-gray-50 text-[10px] uppercase font-bold">
+
+                        <th class="px-6 py-3 text-left">Tracking No.</th>
+                        <th class="px-6 py-3 text-left">Applicant</th>
+                        <th class="px-6 py-3 text-left">Status</th>
+                        <th class="px-6 py-3 text-left">Remarks</th>
+                        <th class="px-6 py-3 text-left">Submitted</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody class="divide-y">
+
+                {% for resident in rejected %}
+
+                    <tr>
+
+                        <td class="px-6 py-4 font-mono text-xs">
+                            {{ resident.tracking_number }}
+                        </td>
+
+                        <td class="px-6 py-4">
+                            {{ resident.full_name }}
+                        </td>
+
+                        <td class="px-6 py-4">
+
+                            {% if resident.status == 'rejected' %}
+
+                                <span class="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-bold">
+                                    Rejected
+                                </span>
+
+                            {% else %}
+
+                                <span class="px-2 py-1 rounded bg-purple-100 text-purple-700 text-xs font-bold">
+                                    Duplicate
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td class="px-6 py-4 text-sm">
+                            {{ resident.remarks|default:"-" }}
+                        </td>
+
+                        <td class="px-6 py-4 text-xs">
+                            {{ resident.created_at|date:"F d, Y" }}
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="5" class="text-center py-8 text-gray-400">
+
+                            No rejected or duplicate applications.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pio Duran COMELEC - Admin Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="h-full overflow-hidden">
+    
+    <!-- Shell Layout Wrapper -->
+    <div class="flex h-full">
+        
+        <!-- SIDEBAR (Desktop) -->
+        <aside class="hidden lg:flex lg:flex-col lg:w-72 lg:bg-blue-950 lg:text-white lg:h-full lg:flex-shrink-0">
+            <!-- Branding Header -->
+            <div class="h-16 flex items-center px-6 border-b border-blue-900 bg-blue-950 gap-3">
+                <div class="bg-amber-500 text-blue-950 w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">
+                    PD
+                </div>
+                <div>
+                    <h1 class="text-sm font-black tracking-tight uppercase leading-none">Pio Duran</h1>
+                    <span class="text-[10px] text-blue-300 font-bold tracking-widest uppercase">COMELEC Portal</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-grow p-4 space-y-1 overflow-y-auto">
+                <span class="text-[10px] font-bold text-blue-300 uppercase tracking-wider block px-3 mb-2">Main Console</span>
+                
+                <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold bg-blue-900 text-white transition">
+                    <i class="fa-solid fa-chart-line w-5 text-amber-500"></i> Dashboard Overview
+                </a>
+
+                <span class="text-[10px] font-bold text-blue-300 uppercase tracking-wider block px-3 pt-4 mb-2">Service Queues</span>
+
+                <a href="{% url 'registration-view' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-blue-100 hover:bg-blue-900/50 hover:text-white transition">
+                    <i class="fa-solid fa-address-card w-5 text-blue-400"></i> New Registrations
+                </a>
+
+                <a href="{% url 'transfers' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-blue-100 hover:bg-blue-900/50 hover:text-white transition">
+                    <i class="fa-solid fa-right-from-bracket w-5 text-blue-400"></i> Transfers
+                </a>
+
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-blue-100 hover:bg-blue-900/50 hover:text-white transition">
+                    <i class="fa-solid fa-user-check w-5 text-blue-400"></i> Reactivations
+                </a>
+
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-blue-100 hover:bg-blue-900/50 hover:text-white transition">
+                    <i class="fa-solid fa-user-pen w-5 text-blue-400"></i> Record Corrections
+                </a>
+
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-blue-100 hover:bg-blue-900/50 hover:text-white transition">
+                    <i class="fa-solid fa-user-plus w-5 text-blue-400"></i> Reinstatements
+                </a>
+
+                <span class="text-[10px] font-bold text-blue-300 uppercase tracking-wider block px-3 pt-4 mb-2">System Support</span>
+                
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-blue-100 hover:bg-blue-900/50 hover:text-white transition">
+                    <i class="fa-solid fa-shield-halved w-5 text-blue-400"></i> Audit Logs
+                </a>
+            </nav>
+
+            <!-- User Session Footer Info -->
+            <div class="p-4 border-t border-blue-900 bg-blue-950/60 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold border border-blue-800">
+                        A
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold leading-none">Registrar Admin</p>
+                        <span class="text-[10px] text-emerald-400 font-semibold mt-1 inline-flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span> Active Session
+                        </span>
+                    </div>
+                </div>
+                <a href="{% url 'logout' %}" class="text-blue-300 hover:text-rose-400 p-2 rounded transition" title="Log Out">
+                    <i class="fa-solid fa-power-off text-base"></i>
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN WINDOW CONTAINER -->
+        <div class="flex-grow flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- Global Dashboard Header -->
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0">
+                <!-- Left Section (Mobile Menu Toggle & Route Context) -->
+                <div class="flex items-center gap-3">
+                    <!-- Mobile Hamburger Button -->
+                    <button id="mobileSidebarToggle" class="lg:hidden text-gray-600 hover:text-gray-900 p-1.5 hover:bg-gray-100 rounded-lg transition">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    <h2 class="text-lg font-bold text-gray-900">Dashboard Console</h2>
+                </div>
+
+                <!-- Right Section (Search & Profile Actions) -->
+                <div class="flex items-center gap-4">
+                    <!-- Search Input Bar -->
+                    <div class="relative hidden sm:block">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-xs">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input 
+                            type="text" 
+                            placeholder="Search applications..." 
+                            class="w-64 pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-800 focus:border-blue-800 transition"
+                        >
+                    </div>
+
+                    <!-- Notification Icon -->
+                    <button class="relative text-gray-400 hover:text-gray-600 p-1.5 hover:bg-gray-50 rounded-full transition">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Interactive Scrollable Dashboard Content -->
+            <main class="flex-grow overflow-y-auto p-6 space-y-6">
+                
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+
+    </div>
+
+    <!-- MOBILE SIDEBAR DRAWER OVERLAY -->
+    <div id="mobileSidebarDrawer" class="fixed inset-0 z-40 hidden lg:hidden" role="dialog" aria-modal="true">
+        <!-- Backdrop Backdrop -->
+        <div class="fixed inset-0 bg-gray-900/80 transition-opacity"></div>
+        
+        <!-- Drawer Layout Container -->
+        <div class="fixed inset-y-0 left-0 flex w-full max-w-xs bg-blue-950 text-white shadow-xl transition-transform">
+            <!-- Sidebar Shell contents duplicated for mobile -->
+            <div class="flex flex-col w-full h-full">
+                <div class="h-16 flex items-center justify-between px-6 border-b border-blue-900">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-amber-500 text-blue-950 w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">PD</div>
+                        <h1 class="text-sm font-black uppercase">Pio Duran</h1>
+                    </div>
+                    <!-- Close button -->
+                    <button id="mobileSidebarClose" class="text-gray-400 hover:text-white p-1 rounded transition">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <nav class="flex-grow p-4 space-y-1 overflow-y-auto">
+                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold bg-blue-900 text-white transition">
+                        <i class="fa-solid fa-chart-line w-5 text-amber-500"></i> Dashboard Overview
+                    </a>
+                    <span class="text-[10px] font-bold text-blue-300 uppercase tracking-wider block px-3 pt-4 mb-2">Service Queues</span>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-blue-100 hover:bg-blue-900/50 hover:text-white transition">
+                        <i class="fa-solid fa-address-card w-5 text-blue-400"></i> New Registrations
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-blue-100 hover:bg-blue-900/50 hover:text-white transition">
+                        <i class="fa-solid fa-right-from-bracket w-5 text-blue-400"></i> Transfers
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-blue-100 hover:bg-blue-900/50 hover:text-white transition">
+                        <i class="fa-solid fa-user-check w-5 text-blue-400"></i> Reactivations
+                    </a>
+                </nav>
+
+                <div class="p-4 border-t border-blue-900 flex items-center justify-between">
+                    <span class="text-xs font-bold">Registrar Admin</span>
+                    <a href="/logout/" class="text-rose-400 p-2 rounded transition">
+                        <i class="fa-solid fa-power-off"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Drawer Interactive Script logic -->
+    <script>
+        const mobileDrawer = document.getElementById('mobileSidebarDrawer');
+        const openBtn = document.getElementById('mobileSidebarToggle');
+        const closeBtn = document.getElementById('mobileSidebarClose');
+
+        openBtn.addEventListener('click', () => {
+            mobileDrawer.classList.remove('hidden');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            mobileDrawer.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>

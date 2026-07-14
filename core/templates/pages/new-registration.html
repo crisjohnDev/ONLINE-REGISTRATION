@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-200 pb-4">
+    <div>
+        <a href="{% url 'home' %}" class="text-sm font-semibold text-blue-800 hover:text-blue-900 inline-flex items-center gap-2 mb-2">
+            <i class="fa-solid fa-arrow-left"></i> Back to Services
+        </a>
+        <h2 class="text-2xl font-black tracking-tight text-gray-900">Application & Submission Portal</h2>
+        <p class="text-sm text-gray-600">Complete the transaction form on the left using the downloadable guide on the right.</p>
+    </div>
+</div>
+
+<!-- Two-Column Workspace -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    
+    <!-- LEFT SIDE: Submission Form (Takes 5 columns) -->
+    <div class="lg:col-span-5 bg-white p-6 rounded-xl border border-gray-200 shadow-sm order-2 lg:order-1">
+        <div class="mb-5">
+            <span class="text-xs font-bold text-amber-600 uppercase tracking-wider inline-flex items-center gap-1.5">
+                <i class="fa-solid fa-shield-halved"></i> Secure Portal
+            </span>
+            <h3 class="text-lg font-bold text-gray-900 mt-1">Submit Your Application</h3>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+            
+            <!-- Applicant Details Section -->
+            <div class="space-y-3">
+                <label class="block text-xs font-bold uppercase tracking-wide text-gray-700">Applicant Full Name</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                    <input 
+                        type="text" 
+                        name="full_name" 
+                        required 
+                        placeholder="Juan Dela Cruz"
+                        class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800 transition"
+                    >
+                </div>
+            </div>
+
+            <!-- Professional File Upload Zone -->
+            <div class="space-y-2">
+                <label class="block text-xs font-bold uppercase tracking-wide text-gray-700">Upload Filled Form & Valid ID</label>
+                <div class="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-xl p-6 text-center transition bg-gray-50 group relative cursor-pointer">
+                    <input 
+                        type="file" 
+                        name="document" 
+                        multiple 
+                        required 
+                        id="fileInput"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        onchange="updateFileList()"
+                    >
+                    <div class="space-y-2 pointer-events-none">
+                        <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 group-hover:text-blue-800 transition-colors"></i>
+                        <p class="text-sm font-semibold text-gray-700">Drag files here or click to browse</p>
+                        <p class="text-xs text-gray-400">Accepts PDF or ZIP files containing the form and requirements (Max 10MB)</p>
+                    </div>
+                </div>
+                <!-- Interactive Dynamic File List -->
+                <div id="fileListContainer" class="hidden mt-2 p-3 bg-blue-50 text-blue-950 text-xs rounded-lg border border-blue-100">
+                    <p class="font-bold mb-1"><i class="fa-solid fa-paperclip mr-1"></i> Ready to Upload:</p>
+                    <ul id="fileList" class="list-disc pl-4 space-y-0.5 text-gray-700"></ul>
+                </div>
+            </div>
+
+            <!-- Attestation Checkbox -->
+            <div class="flex items-start gap-3 pt-2">
+                <input 
+                    type="checkbox" 
+                    name="agreement" 
+                    id="agreement" 
+                    required
+                    class="w-4 h-4 rounded text-blue-800 focus:ring-blue-800 mt-0.5 border-gray-300"
+                >
+                <label for="agreement" class="text-xs text-gray-600 leading-normal select-none">
+                    I certify under penalty of perjury that the information provided is true and correct, and I explicitly consent to the processing of my data in compliance with the Data Privacy Act.
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button 
+                type="submit" 
+                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-500 hover:bg-amber-600 text-blue-950 font-extrabold text-sm tracking-wide uppercase rounded-xl shadow transition duration-150 transform hover:-translate-y-0.5"
+            >
+                <i class="fa-solid fa-paper-plane"></i> Finalize & Transmit Application
+            </button>
+        </form>
+    </div>
+
+    <!-- RIGHT SIDE: PDF Viewer & Direct Download (Takes 7 columns) -->
+    <div class="lg:col-span-7 bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col h-[650px] order-1 lg:order-2">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 px-1">
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-file-pdf text-red-600 text-lg"></i>
+                <div>
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Document Preview</span>
+                    <span class="text-xs text-gray-400">Application Form CEF-1</span>
+                </div>
+            </div>
+            
+            <!-- Direct Download Action -->
+            <a href="{% static 'docs/com_res_11177_annexA.pdf' %}" download class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold rounded-lg transition shadow-sm gap-1.5 w-full sm:w-auto">
+                <i class="fa-solid fa-file-arrow-down"></i> Download Blank Form (CEF-1)
+            </a>
+        </div>
+        
+        <!-- Interactive PDF Container -->
+        <div class="flex-grow w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+            <object 
+                data="{% static 'docs/com_res_11177_annexA.pdf' %}#toolbar=1" 
+                type="application/pdf" 
+                class="w-full h-full"
+            >
+                <!-- Fallback view if browser cannot render PDFs inline -->
+                <div class="flex flex-col items-center justify-center h-full p-6 text-center bg-gray-50">
+                    <i class="fa-regular fa-file-pdf text-5xl text-gray-400 mb-3"></i>
+                    <p class="text-sm font-medium text-gray-800">PDF Preview Unavailable</p>
+                    <p class="text-xs text-gray-500 max-w-xs mt-1 mb-4">Your device doesn't support viewing PDFs directly inside the browser. You can still download the blank document below to print or fill it out manually.</p>
+                    <a href="{% static 'docs/cef1.pdf' %}" class="px-5 py-2.5 bg-blue-800 text-white font-bold text-xs rounded-lg hover:bg-blue-900 transition shadow-sm">
+                        <i class="fa-solid fa-download mr-1"></i> Get CEF-1 Form
+                    </a>
+                </div>
+            </object>
+        </div>
+    </div>
+    
+</div>
+
+<!-- Simple inline script to manage file feedback -->
+<script>
+    function updateFileList() {
+        const input = document.getElementById('fileInput');
+        const container = document.getElementById('fileListContainer');
+        const list = document.getElementById('fileList');
+        
+        list.innerHTML = '';
+        if (input.files.length > 0) {
+            container.classList.remove('hidden');
+            for (let i = 0; i < input.files.length; i++) {
+                const li = document.createElement('li');
+                li.textContent = `${input.files[i].name} (${(input.files[i].size/1024/1024).toFixed(2)} MB)`;
+                list.appendChild(li);
+            }
+        } else {
+            container.classList.add('hidden');
+        }
+    }
+</script>
+{% endblock %}

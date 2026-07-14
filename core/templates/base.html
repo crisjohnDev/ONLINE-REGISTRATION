@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pio Duran Online Registration Portal</title>
+    <!-- Tailwind CSS for clean, professional styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for official-looking icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans text-gray-900 flex flex-col min-h-screen">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="bg-white border-b-4 border-blue-800 shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-4">
+            
+            <!-- Dual Logo Section -->
+            <div class="flex items-center gap-4">
+                <!-- Logo 1: National Electoral / COMELEC Seal Image -->
+                <img
+                    src="{% static 'images/COMELEC.png' %}"
+                    alt="COMELEC Official Seal"
+                    class="w-16 h-16 object-contain rounded-full bg-slate-100 p-0.5 shadow-sm"
+                />
+                
+                <!-- Vertical Divider -->
+                <div class="hidden sm:block w-px h-12 bg-gray-300"></div>
+                
+                <!-- Logo 2: Pio Duran Municipal Seal Image -->
+                <img 
+                    src="{% static 'images/PIODURAN.png' %}" 
+                    alt="Pio Duran Municipal Seal" 
+                    class="w-16 h-16 object-contain rounded-full bg-slate-100 p-0.5 shadow-sm"
+                />
+                
+                <!-- Portal Title -->
+                <div class="text-center sm:text-left ml-2">
+                    <h1 class="text-xl font-extrabold tracking-tight text-blue-900 leading-tight">MUNICIPALITY OF PIO DURAN</h1>
+                    <p class="text-xs font-semibold text-amber-600 tracking-wider uppercase">Election Registration Portal</p>
+                </div>
+            </div>
+
+            <!-- Right Side Meta Info -->
+            <div class="text-center sm:text-right hidden md:block">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <span class="w-2 h-2 mr-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                    Portal Active
+                </span>
+                <p class="text-xs text-gray-500 mt-1">Republic of the Philippines</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="bg-gradient-to-b from-blue-900 to-blue-950 text-white py-12 px-4 text-center">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-3xl sm:text-4xl font-black mb-4 tracking-tight">Secure Online Voter Services</h2>
+            <p class="text-base sm:text-lg text-blue-100 font-normal max-w-xl mx-auto">
+                Welcome to the official online registration portal for the residents of Pio Duran. Select a service below to begin your application process.
+            </p>
+        </div>
+    </section>
+
+    <!-- MAIN SERVICES GRID -->
+    <main class="flex-grow max-w-6xl mx-auto px-4 py-12 w-full">
+        {% block content %}{% endblock%}
+    </main>
+
+    <!-- PUBLIC ADVISORY WARNING -->
+    <section class="max-w-6xl mx-auto px-4 mb-12 w-full">
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0 text-amber-600 text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="ml-3">
+                    <h5 class="text-sm font-bold text-amber-900">Official Government Transparency Notice</h5>
+                    <p class="text-xs text-amber-700 mt-1 leading-relaxed">
+                        Pursuant to Republic Act No. 10173 (Data Privacy Act of 2012), all personal data submitted through this secure municipal portal is handled with strict confidentiality. Please prepare valid government IDs before initiating any transaction.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- OFFICIAL FOOTER -->
+    <footer class="bg-gray-900 text-gray-400 text-xs py-8 px-4 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <p class="font-bold text-gray-300">Office of the Election Officer — Pio Duran, Albay</p>
+                <p class="mt-1">© 2026 Municipality of Pio Duran. All Rights Reserved.</p>
+            </div>
+            <div class="flex gap-4">
+                <a href="#privacy" class="hover:underline hover:text-white">Data Privacy Policy</a>
+                <a href="#terms" class="hover:underline hover:text-white">Terms of Service</a>
+                <a href="#support" class="hover:underline hover:text-white">Helpdesk Support</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
