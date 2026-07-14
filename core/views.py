@@ -21,6 +21,8 @@ def new_registration(request):
         )
 
         document = request.FILES.get("document")
+        contact_number = request.POST.get('contact_number')
+        supporting_document = request.FILES.get('supporting_document')
 
 
         if not full_name:
@@ -105,6 +107,8 @@ def new_registration(request):
         # Create new application
         resident = Residents.objects.create(
             full_name=full_name,
+            contact_number=contact_number,
+            supporting_document=supporting_document,
             document_type=Residents.DocumentType.NEW_REGISTRATION,
             document=document,
             status=Residents.Status.PENDING
@@ -217,6 +221,8 @@ def update_info(request):
 
         full_name = request.POST.get("full_name", "").strip()
         document = request.FILES.get("document")
+        contact_number = request.POST.get('contact_number')
+        supporting_document = request.FILES.get('supporting_document')
 
         if not full_name:
             messages.error(request, "Full name is required.")
@@ -246,6 +252,8 @@ def update_info(request):
 
         resident = Residents.objects.create(
             full_name=full_name,
+            contact_number=contact_number,
+            supporting_document=supporting_document,
             document_type=Residents.DocumentType.UPDATE,
             document=document,
         )

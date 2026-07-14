@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, RegexValidator
 from django.utils import timezone
 
 # Create your models here.
@@ -47,6 +47,31 @@ class Residents(models.Model):
                 ]
             )
         ]
+    )
+
+    contact_number = models.CharField(
+        max_length=15,
+        validators=[
+            RegexValidator(
+                regex=r'^(09\d{9}|\+639\d{9})$',
+                message="Enter a valid Philippine mobile number (e.g. 09123456789 or +639123456789)."
+            )
+        ]
+    )
+
+    supporting_document = models.FileField(
+        upload_to="resident_documents/",
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=[
+                    "pdf",
+                    "jpg",
+                    "jpeg",
+                    "png"
+                ]
+            )
+        ],
+        help_text="Upload a valid government-issued ID or other supporting document."
     )
 
     thumb_mark = models.ImageField(
