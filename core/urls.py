@@ -17,5 +17,9 @@ urlpatterns = [
     path("capture-thumbmark/<int:pk>/", views.capture_thumbmark, name="capture_thumbmark"),
     path("registration/reject/<int:pk>/", views.reject_registration, name="reject_registration"),
     path('incoming-transfers/', views.transfers, name='transfers'),
+    path('reactivation/', views.voter_reactivation, name="voter-reactivation"),
+    path('voter-correction/', views.voter_correction, name='voter-correction'),
+    path('voter_reinstatement/', views.voter_reinstatement, name='voter-reinstatement'),
+    path('audit-logs/', views.audit_logs, name='audit-logs'),
     path('logout/', views.logout_view, name='logout')
 ]

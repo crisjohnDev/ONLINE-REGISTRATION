@@ -508,3 +508,18 @@ def transfers(request):
         context
     )
 
+@login_required
+def voter_reactivation(request):
+    return render(request, 'core/voter_reactivation.html')
+
+@login_required
+def voter_correction(request):
+    return render(request, 'core/voter_correction.html')
+
+@login_required
+def voter_reinstatement(request):
+    return render(request, 'core/voter_reinstatement.html')
+
+@login_required
+def audit_logs(request):
+    return render(request, 'core/audit_logs.html')
