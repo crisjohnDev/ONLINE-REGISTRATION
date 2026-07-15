@@ -44,6 +44,7 @@
                     <tr class="bg-gray-50 text-[10px] font-bold tracking-wider uppercase text-gray-500 border-b border-gray-200">
                         <th class="px-6 py-3.5">Resident Full Name</th>
                         <th class="px-6 py-3.5">Submitted Documents</th>
+                        <th class="px-6 py-3.5">Supporting Documents</th>
                         <th class="px-6 py-3.5">Submission Date</th>
                         <th class="px-6 py-3.5 text-right">Verification Action</th>
                     </tr>
@@ -79,6 +80,19 @@
                         {% if resident.document %}
                         <a
                             href="{{ resident.document.url }}"
+                            target="_blank"
+                            class="text-blue-600 hover:underline"
+                        >
+                            View Document
+                        </a>
+                        {% endif %}
+
+                    </td>
+                    <td class="px-6 py-4">
+
+                        {% if resident.supporting_document %}
+                        <a
+                            href="{{ resident.supporting_document.url }}"
                             target="_blank"
                             class="text-blue-600 hover:underline"
                         >
