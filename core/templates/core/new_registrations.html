@@ -33,7 +33,7 @@
         <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
                 <h4 class="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <i class="fa-solid fa-clock text-amber-500"></i> 1. Pending Verification Queue
+                    <i class="fa-solid fa-clock text-amber-500"></i> Pending Verification Queue
                 </h4>
                 <p class="text-[11px] text-gray-500">Initial document inspection and digital data verification phase.</p>
             </div>
@@ -148,7 +148,7 @@
         <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
                 <h4 class="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <i class="fa-solid fa-fingerprint text-blue-600"></i> 2. Approved & Awaiting Thumbmark
+                    <i class="fa-solid fa-fingerprint text-blue-600"></i> Approved & Awaiting Thumbmark
                 </h4>
                 <p class="text-[11px] text-gray-500">Documents verified. Residents must appear physically at the office to capture their biometrics.</p>
             </div>
@@ -244,98 +244,6 @@
         </div>
     </div>
 
-    <!-- PIPELINE STAGE 3: FULLY REGISTERED RESIDENTS -->
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <div>
-                <h4 class="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <i class="fa-solid fa-circle-check text-emerald-600"></i> 3. Completed Registrations (New Residents)
-                </h4>
-                <p class="text-[11px] text-gray-500">Voters who have completed documents, approval validation, and full biometric sign-off.</p>
-            </div>
-            <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded border border-emerald-200 uppercase tracking-wider">Active Voter Roster</span>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse whitespace-nowrap">
-                <thead>
-                    <tr class="bg-gray-50 text-[10px] font-bold tracking-wider uppercase text-gray-500 border-b border-gray-200">
-                        <th class="px-6 py-3.5">New Registered Resident</th>
-                        <th class="px-6 py-3.5">Biometric Reference</th>
-                        <th class="px-6 py-3.5">Completion Date</th>
-                        <th class="px-6 py-3.5">Status</th>
-                        <th class="px-6 py-3.5 text-right">Records</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 text-sm">
-
-                {% for resident in approved %}
-
-                <tr class="hover:bg-gray-50/50">
-
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-
-                            <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-700 font-bold text-xs flex items-center justify-center border border-amber-100">
-                                {{ resident.full_name|slice:":1"|upper }}
-                            </div>
-
-                            <div>
-                                <p class="font-bold text-gray-900">
-                                    {{ resident.full_name }}
-                                </p>
-
-                                <span class="text-[10px] text-gray-400">
-                                    {{ resident.tracking_number }}
-                                </span>
-                            </div>
-
-                        </div>
-                    </td>
-
-                    <td class="px-6 py-4">
-
-                        {% if resident.document %}
-                        <a
-                            href="{{ resident.document.url }}"
-                            target="_blank"
-                            class="text-blue-600 hover:underline"
-                        >
-                            View Document
-                        </a>
-                        {% endif %}
-
-                    </td>
-
-                    <td class="px-6 py-4 text-xs">
-                        {{ resident.created_at|date:"F d, Y h:i A" }}
-                    </td>
-
-                    <td class="px-6 py-4 text-right">
-
-                        <a href="#"
-                        class="px-3 py-1 bg-red-600 text-white rounded">
-                            Reject
-                        </a>
-
-                    </td>
-
-                </tr>
-
-                {% empty %}
-
-                <tr>
-                    <td colspan="4" class="py-8 text-center text-gray-400">
-                        No pending applications.
-                    </td>
-                </tr>
-
-                {% endfor %}
-
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <!-- PIPELINE STAGE 4: REJECTED / DUPLICATE -->
     <div class="bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden">
 
@@ -344,7 +252,7 @@
             <div>
                 <h4 class="text-sm font-bold text-red-800 flex items-center gap-2">
                     <i class="fa-solid fa-circle-xmark"></i>
-                    4. Rejected / Duplicate Applications
+                    Rejected / Duplicate Applications
                 </h4>
 
                 <p class="text-[11px] text-red-600">

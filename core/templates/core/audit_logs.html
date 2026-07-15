@@ -5,8 +5,8 @@
     <!-- Header Context -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h3 class="text-xl font-bold text-gray-900 tracking-tight">System Audit Logs</h3>
-            <p class="text-xs text-gray-500 mt-1">Traceable history of administrative actions, profile updates, and database modifications across the List of Residents.</p>
+            <h3 class="text-xl font-bold text-gray-900 tracking-tight">System Audit Logs & Registry Verification</h3>
+            <p class="text-xs text-gray-500 mt-1">Traceable history of administrative actions alongside file attachments submitted for record updates.</p>
         </div>
         <div class="flex items-center gap-2 self-start sm:self-center">
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Analytics Bento Summary Strip -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    {% comment %} <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-slate-50 text-slate-700 flex items-center justify-center text-lg font-semibold border border-slate-100">
                 <i class="fa-solid fa-database"></i>
@@ -44,6 +44,108 @@
                 <span class="text-[10px] font-bold tracking-wider text-gray-400 uppercase block">Critical Changes Today</span>
                 <p class="text-lg font-bold text-gray-900">4</p>
             </div>
+        </div>
+    </div> {% endcomment %}
+
+    <!-- NEW SECTION: List of Residents Submission Registry -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+            <div>
+                <h4 class="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-folder-open text-slate-500"></i> Resident Documentation Registry
+                </h4>
+                <p class="text-[11px] text-gray-500">Review pending and processed entry modifications with linked verification attachments.</p>
+            </div>
+            <div class="relative flex-grow max-w-xs">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-xs">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input 
+                    type="text" 
+                    placeholder="Search by full name..." 
+                    class="w-full pl-8 pr-3 py-1.5 border border-gray-200 bg-white rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-600 focus:border-slate-600 transition"
+                >
+            </div>
+        </div>
+
+        <!-- Document Matrix Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                    <tr class="bg-gray-50 text-[10px] font-bold tracking-wider uppercase text-gray-500 border-b border-gray-200">
+                        <th class="px-6 py-3.5">Resident Full Name</th>
+                        <th class="px-6 py-3.5">Submitted Document (CEF-1)</th>
+                        <th class="px-6 py-3.5">Submitted Supporting Document</th>
+                        <th class="px-6 py-3.5 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    {% for item in residents_list %}
+                    <tr class="hover:bg-gray-50/50 transition">
+                        <!-- Resident Identity Profile -->
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center justify-center border border-slate-200">
+                                    {{ item.full_name|slice:":2"|upper }}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-900 leading-tight text-xs">{{ item.full_name }}</p>
+                                    <span class="text-[9px] text-gray-400 font-mono">Mobile: +63 {{ item.contact_number }}</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Main Core Form Field -->
+                        <td class="px-6 py-4">
+                            {% if item.document %}
+                            <a href="{{ item.document.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 hover:text-blue-900 hover:underline">
+                                <i class="fa-solid fa-file-pdf text-red-600"></i>
+                                {{ item.document.name|truncatechars:25 }}
+                            </a>
+                            {% else %}
+                            <span class="text-xs text-gray-400 italic">Missing Application Form</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Supplementary Proof Attachments -->
+                        <td class="px-6 py-4">
+                            {% if item.supporting_document %}
+                            <a href="{{ item.supporting_document.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 hover:underline bg-slate-50 px-2 py-1 rounded border border-slate-200">
+                                <i class="fa-solid fa-file-shield text-slate-500"></i>
+                                {{ item.supporting_document.name|truncatechars:25 }}
+                            </a>
+                            {% else %}
+                            <span class="text-xs text-amber-600 font-medium inline-flex items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation text-[10px]"></i> No proofs attached
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Action Matrix (View & Delete Hooks) -->
+                        <td class="px-6 py-4 text-center">
+                            <div class="inline-flex items-center justify-center gap-1.5">
+                                <a href="#" class="px-2 py-1 text-[11px] font-bold text-slate-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg transition shadow-sm inline-flex items-center gap-1">
+                                    <i class="fa-regular fa-eye"></i> View
+                                </a>
+                                <a href="#" onclick="return confirm('Are you sure you want to remove this resident file and cancel processing?');" class="px-2 py-1 text-[11px] font-bold text-rose-600 bg-white border border-rose-200 hover:bg-rose-50 rounded-lg transition shadow-sm inline-flex items-center gap-1">
+                                    <i class="fa-regular fa-trash-can"></i> Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center">
+                            <div class="max-w-sm mx-auto text-center space-y-1.5">
+                                <i class="fa-regular fa-folder-open text-3xl text-gray-300 block"></i>
+                                <p class="text-xs font-bold text-gray-900">No update profiles submitted</p>
+                                <p class="text-[11px] text-gray-500">No entry updates match the validation criteria.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -148,7 +250,6 @@
                                     {{ log.resident.full_name|slice:":2"|upper }}
                                 </div>
                                 <div>
-                                    <!-- Generates a clean link to go directly to their profile inside your List of Residents -->
                                     <a href="#" class="font-bold text-slate-900 hover:text-indigo-600 hover:underline text-xs block leading-tight">
                                         {{ log.resident.full_name }}
                                     </a>

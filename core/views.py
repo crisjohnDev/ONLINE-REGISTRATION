@@ -370,10 +370,10 @@ def new_registration_view(request):
         status=Residents.Status.PRE_APPROVED
     ).order_by("-created_at")
 
-    approved = Residents.objects.filter(
-        document_type=Residents.DocumentType.NEW_REGISTRATION,
-        status=Residents.Status.APPROVED
-    ).order_by("-created_at")
+    # approved = Residents.objects.filter(
+    #     document_type=Residents.DocumentType.NEW_REGISTRATION,
+    #     status=Residents.Status.APPROVED
+    # ).order_by("-created_at")
 
     rejected = Residents.objects.filter(
         document_type=Residents.DocumentType.NEW_REGISTRATION,
@@ -386,12 +386,12 @@ def new_registration_view(request):
     context = {
         "pending": pending,
         "pre_approved": pre_approved,
-        "approved": approved,
+        # "approved": approved,
         "rejected": rejected,
 
         "pending_count": pending.count(),
         "pre_approved_count": pre_approved.count(),
-        "approved_count": approved.count(),
+        # "approved_count": approved.count(),
         "rejected_count": rejected.count(),
     }
 
@@ -530,4 +530,8 @@ def voter_reinstatement(request):
 
 @login_required
 def audit_logs(request):
-    return render(request, 'core/audit_logs.html')
+    residents_list = Residents.objects.filter(
+        status=Residents.Status.APPROVED
+        ).order_by("-created_at")
+    
+    return render(request, 'core/audit_logs.html',{'residents_list': residents_list})
