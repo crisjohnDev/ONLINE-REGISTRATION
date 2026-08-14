@@ -2,203 +2,1324 @@
 {% load static %}
 
 {% block content %}
-<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-200 pb-4">
+
+<style>
+    /* =========================================================
+       PDF EDITOR
+    ========================================================= */
+
+    #pdfEditor {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background: #e5e7eb;
+    }
+
+    #pdfPages {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        padding: 20px 10px;
+        box-sizing: border-box;
+    }
+
+    /* =========================================================
+       PDF PAGE
+    ========================================================= */
+
+    .pdf-page {
+        position: relative;
+        background: #ffffff;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+        width: 100% !important;
+        max-width: 850px;
+
+        height: auto;
+
+        flex-shrink: 0;
+    }
+
+    .pdf-canvas {
+        display: block;
+
+        width: 100%;
+        height: auto;
+
+        max-width: 100%;
+    }
+
+    /* =========================================================
+       ELEMENT LAYER
+    ========================================================= */
+
+    .pdf-element-layer {
+        position: absolute;
+        inset: 0;
+
+        pointer-events: none;
+    }
+
+    .pdf-element {
+        position: absolute;
+
+        pointer-events: auto;
+
+        cursor: move;
+
+        user-select: none;
+
+        z-index: 20;
+    }
+
+    .pdf-element:hover {
+        outline: 1px dashed #2563eb;
+    }
+
+    .selected-element {
+        outline: 2px solid #2563eb !important;
+        outline-offset: 1px;
+    }
+
+    /* =========================================================
+       TEXT
+    ========================================================= */
+
+    .text-element {
+        background: rgba(255, 255, 255, 0.80);
+
+        padding: 2px 4px;
+
+        min-width: 20px;
+
+        font-family: Arial, sans-serif;
+
+        font-size: 14px;
+
+        line-height: 1.2;
+
+        white-space: nowrap;
+    }
+
+    /* =========================================================
+       CHECK
+    ========================================================= */
+
+    .check-element {
+        font-size: 22px;
+
+        font-weight: 900;
+
+        line-height: 1;
+
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* =========================================================
+       X
+    ========================================================= */
+
+    .cross-element {
+        font-size: 22px;
+
+        font-weight: 900;
+
+        line-height: 1;
+
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* =========================================================
+       DATE
+    ========================================================= */
+
+    .date-element {
+        background: rgba(255, 255, 255, 0.80);
+
+        padding: 2px 4px;
+
+        font-size: 13px;
+
+        white-space: nowrap;
+    }
+
+    /* =========================================================
+       SIGNATURE
+    ========================================================= */
+
+    .signature-element {
+        background: rgba(255, 255, 255, 0.25);
+
+        overflow: hidden;
+    }
+
+    .signature-element img {
+        width: 100%;
+        height: 100%;
+
+        object-fit: contain;
+
+        display: block;
+    }
+
+    /* =========================================================
+       TOOLBAR
+    ========================================================= */
+
+    .pdf-tool {
+        padding: 7px 11px;
+
+        border: 1px solid #cbd5e1;
+
+        border-radius: 8px;
+
+        background: white;
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        color: #334155;
+
+        transition: all 0.15s ease;
+    }
+
+    .pdf-tool:hover {
+        background: #f1f5f9;
+
+        border-color: #94a3b8;
+    }
+
+    .active-tool {
+        background: #1e40af !important;
+
+        color: white !important;
+
+        border-color: #1e40af !important;
+    }
+
+    /* =========================================================
+       SIGNATURE CANVAS
+    ========================================================= */
+
+    #signatureCanvas {
+        display: block;
+
+        width: 100%;
+
+        height: 250px;
+
+        cursor: crosshair;
+
+        background: white;
+    }
+
+    /* =========================================================
+       STATUS
+    ========================================================= */
+
+    #pdfSaveStatus {
+        display: none;
+    }
+
+    #pdfSaveStatus.show {
+        display: flex;
+    }
+
+    /* =========================================================
+       MOBILE
+    ========================================================= */
+
+    @media (max-width: 768px) {
+
+        #pdfEditor {
+            min-height: 500px;
+        }
+
+        #pdfPages {
+            padding: 12px 5px;
+        }
+
+        .pdf-tool {
+            padding: 6px 9px;
+            font-size: 11px;
+        }
+
+    }
+</style>
+
+
+<!-- =========================================================
+     PAGE HEADER
+========================================================= -->
+
+<div
+    class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-200 pb-4"
+>
+
     <div>
-        <a href="{% url 'home' %}" class="text-sm font-semibold text-blue-800 hover:text-blue-900 inline-flex items-center gap-2 mb-2">
-            <i class="fa-solid fa-arrow-left"></i> Back to Services
+
+        <a
+            href="{% url 'home' %}"
+            class="text-sm font-semibold text-blue-800 hover:text-blue-900 inline-flex items-center gap-2 mb-2"
+        >
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Back to Services
         </a>
-        <h2 class="text-2xl font-black tracking-tight text-gray-900">Application & Submission Portal</h2>
-        <p class="text-sm text-gray-600">Complete the transaction form on the left using the downloadable guide on the right.</p>
+
+        <h2 class="text-2xl font-black tracking-tight text-gray-900">
+            Application & Submission Portal
+        </h2>
+
+        <p class="text-sm text-gray-600">
+            Fill and sign the CEF-1 application form, then submit your supporting documents.
+        </p>
+
     </div>
+
 </div>
 
-<!-- Two-Column Workspace -->
+
+<!-- =========================================================
+     TWO COLUMN WORKSPACE
+========================================================= -->
+
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-    
-    <!-- LEFT SIDE: Submission Form (Takes 5 columns) -->
-    <div class="lg:col-span-5 bg-white p-6 rounded-xl border border-gray-200 shadow-sm order-2 lg:order-1">
+
+
+    <!-- =====================================================
+         LEFT SIDE
+    ====================================================== -->
+
+    <div
+        class="lg:col-span-5 bg-white p-6 rounded-xl border border-gray-200 shadow-sm order-2 lg:order-1"
+    >
+
         <div class="mb-5">
-            <span class="text-xs font-bold text-amber-600 uppercase tracking-wider inline-flex items-center gap-1.5">
-                <i class="fa-solid fa-shield-halved"></i> Secure Portal
+
+            <span
+                class="text-xs font-bold text-amber-600 uppercase tracking-wider inline-flex items-center gap-1.5"
+            >
+                <i class="fa-solid fa-shield-halved"></i>
+
+                Secure Portal
             </span>
-            <h3 class="text-lg font-bold text-gray-900 mt-1">Submit Your Application</h3>
+
+            <h3 class="text-lg font-bold text-gray-900 mt-1">
+                Submit Your Application
+            </h3>
+
+            <p class="text-xs text-gray-500 mt-1">
+                Complete the form on the right before submitting your application.
+            </p>
+
         </div>
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+
+        <!-- =================================================
+             FORM
+        ================================================== -->
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            id="applicationForm"
+            class="space-y-5"
+        >
+
             {% csrf_token %}
-            
-            <!-- Applicant Details Section -->
+
+
+            <!-- =============================================
+                 APPLICANT NAME
+            ============================================== -->
+
             <div class="space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-700">Applicant Full Name</label>
+
+                <label
+                    for="fullName"
+                    class="block text-xs font-bold uppercase tracking-wide text-gray-700"
+                >
+                    Applicant Full Name
+                </label>
+
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm">
+
+                    <span
+                        class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm"
+                    >
                         <i class="fa-solid fa-user"></i>
                     </span>
-                    <input 
-                        type="text" 
-                        name="full_name" 
-                        required 
+
+                    <input
+                        type="text"
+                        name="full_name"
+                        id="fullName"
+                        required
+                        autocomplete="name"
                         placeholder="Juan Dela Cruz"
                         class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800 transition"
                     >
+
                 </div>
+
             </div>
 
-            <!-- Mobile Number Input Field -->
+
+            <!-- =============================================
+                 MOBILE NUMBER
+            ============================================== -->
+
             <div class="space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-700">Mobile Number</label>
-                <div class="relative flex rounded-lg border border-gray-300 focus-within:ring-2 focus-within:ring-blue-800 focus-within:border-blue-800 transition overflow-hidden">
-                    <span class="inline-flex items-center px-3 bg-gray-50 border-r border-gray-300 text-gray-500 text-xs font-semibold font-mono select-none">
+
+                <label
+                    for="contactNumber"
+                    class="block text-xs font-bold uppercase tracking-wide text-gray-700"
+                >
+                    Mobile Number
+                </label>
+
+                <div
+                    class="relative flex rounded-lg border border-gray-300 focus-within:ring-2 focus-within:ring-blue-800 focus-within:border-blue-800 transition overflow-hidden"
+                >
+
+                    <span
+                        class="inline-flex items-center px-3 bg-gray-50 border-r border-gray-300 text-gray-500 text-xs font-semibold font-mono select-none"
+                    >
                         +63
                     </span>
-                    <span class="absolute inset-y-0 left-14 flex items-center text-gray-400 text-sm pointer-events-none">
+
+                    <span
+                        class="absolute inset-y-0 left-14 flex items-center text-gray-400 text-sm pointer-events-none"
+                    >
                         <i class="fa-solid fa-phone"></i>
                     </span>
-                    <input 
-                        type="tel" 
-                        name="contact_number" 
-                        required 
+
+                    <input
+                        type="tel"
+                        name="contact_number"
+                        id="contactNumber"
+                        required
                         maxlength="10"
+                        minlength="10"
                         placeholder="9123456789"
                         pattern="9[0-9]{9}"
+                        inputmode="numeric"
+                        autocomplete="tel"
                         title="Please enter a valid 10-digit mobile number starting with 9"
                         class="w-full pl-9 pr-3 py-2 text-sm focus:outline-none"
                     >
+
                 </div>
+
+                <p class="text-[10px] text-gray-400">
+                    Example: 9123456789
+                </p>
+
             </div>
 
-            <!-- Professional File Upload Zone: Filled Form -->
-            <div class="space-y-2">
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-700">Upload Filled Application Form (CEF-1)</label>
-                <div class="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-xl p-5 text-center transition bg-gray-50 group relative cursor-pointer">
-                    <input 
-                        type="file" 
-                        name="document" 
-                        required 
-                        id="appFileInput"
-                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        onchange="updateFileList('appFileInput', 'appFileListContainer', 'appFileList')"
+
+            <!-- =============================================
+                 CEF-1 STATUS
+            ============================================== -->
+
+            <div
+                class="rounded-xl border border-blue-200 bg-blue-50 p-4"
+            >
+
+                <div class="flex items-start gap-3">
+
+                    <div
+                        class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0"
                     >
-                    <div class="space-y-1.5 pointer-events-none">
-                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 group-hover:text-blue-800 transition-colors"></i>
-                        <p class="text-xs font-bold text-gray-700">Drag application form here or browse</p>
-                        <p class="text-[10px] text-gray-400">Accepts filled PDF or images up to 5MB</p>
+                        <i class="fa-solid fa-file-pdf"></i>
                     </div>
+
+                    <div>
+
+                        <p class="text-sm font-bold text-gray-900">
+                            CEF-1 Application Form
+                        </p>
+
+                        <p class="text-xs text-gray-600 mt-1 leading-relaxed">
+                            The official CEF-1 application form is already loaded
+                            in the Fill & Sign editor.
+                        </p>
+
+                        <div
+                            class="flex items-center gap-1.5 text-[11px] text-green-700 font-semibold mt-2"
+                        >
+
+                            <i class="fa-solid fa-circle-check"></i>
+
+                            <span>
+                                No CEF-1 PDF upload required
+                            </span>
+
+                        </div>
+
+                    </div>
+
                 </div>
-                <!-- App File Feedback Container -->
-                <div id="appFileListContainer" class="hidden mt-2 p-2.5 bg-blue-50 text-blue-950 text-xs rounded-lg border border-blue-100">
-                    <p class="font-bold mb-1"><i class="fa-solid fa-paperclip mr-1"></i> Form Ready:</p>
-                    <ul id="appFileList" class="list-disc pl-4 space-y-0.5 text-gray-700 font-mono text-[11px]"></ul>
-                </div>
+
             </div>
 
-            <!-- Professional File Upload Zone: Supporting Document -->
+
+            <!-- =============================================
+                 EDITOR STATUS
+            ============================================== -->
+
+            <div
+                id="pdfSaveStatus"
+                class="items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-800"
+            >
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <span>
+                    Your CEF-1 changes are ready to be submitted.
+                </span>
+
+            </div>
+
+
+            <!-- =============================================
+                 SUPPORTING DOCUMENTS
+            ============================================== -->
+
             <div class="space-y-2">
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-700">Upload Supporting Identity Documents (Valid ID / Proof)</label>
-                <div class="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-xl p-5 text-center transition bg-gray-50 group relative cursor-pointer">
-                    <input 
-                        type="file" 
-                        name="supporting_document" 
+
+                <label
+                    for="supportFileInput"
+                    class="block text-xs font-bold uppercase tracking-wide text-gray-700"
+                >
+                    Upload Supporting Identity Documents
+                    (Valid ID / Proof)
+                </label>
+
+                <div
+                    class="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-xl p-5 text-center transition bg-gray-50 group relative cursor-pointer"
+                >
+
+                    <input
+                        type="file"
+                        name="supporting_document"
                         multiple
-                        required 
+                        required
                         id="supportFileInput"
+                        accept=".pdf,.jpg,.jpeg,.png,.zip"
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        onchange="updateFileList('supportFileInput', 'supportFileListContainer', 'supportFileList')"
+                        onchange="updateFileList(
+                            'supportFileInput',
+                            'supportFileListContainer',
+                            'supportFileList'
+                        )"
                     >
+
                     <div class="space-y-1.5 pointer-events-none">
-                        <i class="fa-solid fa-file-shield text-2xl text-gray-400 group-hover:text-blue-800 transition-colors"></i>
-                        <p class="text-xs font-bold text-gray-700">Drag IDs or certificates here or browse</p>
-                        <p class="text-[10px] text-gray-400">Accepts multiple PDFs, ZIPs, or images up to 10MB total</p>
+
+                        <i
+                            class="fa-solid fa-file-shield text-2xl text-gray-400 group-hover:text-blue-800 transition-colors"
+                        ></i>
+
+                        <p class="text-xs font-bold text-gray-700">
+                            Upload IDs or certificates here or browse
+                        </p>
+
+                        <p class="text-[10px] text-gray-400">
+                            PDFs, ZIPs, or images
+                        </p>
+
                     </div>
+
                 </div>
-                <!-- Support File Feedback Container -->
-                <div id="supportFileListContainer" class="hidden mt-2 p-2.5 bg-blue-50 text-blue-950 text-xs rounded-lg border border-blue-100">
-                    <p class="font-bold mb-1"><i class="fa-solid fa-paperclip mr-1"></i> Attachments Ready:</p>
-                    <ul id="supportFileList" class="list-disc pl-4 space-y-0.5 text-gray-700 font-mono text-[11px]"></ul>
+
+
+                <!-- FILE LIST -->
+
+                <div
+                    id="supportFileListContainer"
+                    class="hidden mt-2 p-2.5 bg-blue-50 text-blue-950 text-xs rounded-lg border border-blue-100"
+                >
+
+                    <p class="font-bold mb-1">
+
+                        <i class="fa-solid fa-paperclip mr-1"></i>
+
+                        Attachments Ready:
+                    </p>
+
+                    <ul
+                        id="supportFileList"
+                        class="list-disc pl-4 space-y-0.5 text-gray-700 font-mono text-[11px]"
+                    ></ul>
+
                 </div>
+
             </div>
 
-            <!-- Attestation Checkbox -->
+
+            <!-- =============================================
+                 AGREEMENT
+            ============================================== -->
+
             <div class="flex items-start gap-3 pt-2">
-                <input 
-                    type="checkbox" 
-                    name="agreement" 
-                    id="agreement" 
+
+                <input
+                    type="checkbox"
+                    name="agreement"
+                    id="agreement"
                     required
                     class="w-4 h-4 rounded text-blue-800 focus:ring-blue-800 mt-0.5 border-gray-300"
                 >
-                <label for="agreement" class="text-xs text-gray-600 leading-normal select-none">
-                    I certify under penalty of perjury that the information provided is true and correct, and I explicitly consent to the processing of my data in compliance with the Data Privacy Act.
+
+                <label
+                    for="agreement"
+                    class="text-xs text-gray-600 leading-normal select-none"
+                >
+
+                    I certify under penalty of perjury that the information
+                    provided is true and correct, and I explicitly consent
+                    to the processing of my data in compliance with the
+                    Data Privacy Act.
+
                 </label>
+
             </div>
 
-            <!-- Submit Button -->
-            <button 
-                type="submit" 
-                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-500 hover:bg-amber-600 text-blue-950 font-extrabold text-sm tracking-wide uppercase rounded-xl shadow transition duration-150 transform hover:-translate-y-0.5"
+
+            <!-- =============================================
+                 HIDDEN PDF DATA
+
+                 pdf-editor.js MUST update this field.
+            ============================================== -->
+
+            <input
+                type="hidden"
+                name="pdf_elements"
+                id="pdfElements"
+                value="[]"
             >
-                <i class="fa-solid fa-paper-plane"></i> Finalize & Transmit Application
+
+
+            <!-- =============================================
+                 SUBMIT
+            ============================================== -->
+
+            <button
+                type="submit"
+                id="submitApplication"
+                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-500 hover:bg-amber-600 text-blue-950 font-extrabold text-sm tracking-wide uppercase rounded-xl shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+
+                <i class="fa-solid fa-file-signature"></i>
+
+                <span id="submitText">
+                    Save & Send Application
+                </span>
+
             </button>
+
         </form>
+
     </div>
 
-    <!-- RIGHT SIDE: PDF Viewer & Direct Download (Takes 7 columns) -->
-    <div class="lg:col-span-7 bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col h-[760px] order-1 lg:order-2">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 px-1">
+
+    <!-- =====================================================
+         RIGHT SIDE PDF EDITOR
+    ====================================================== -->
+
+    <div
+        class="lg:col-span-7 bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col h-[760px] order-1 lg:order-2"
+    >
+
+        <!-- ================================================
+             HEADER
+        ================================================= -->
+
+        <div
+            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 px-1"
+        >
+
             <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-file-pdf text-red-600 text-lg"></i>
+
+                <i
+                    class="fa-solid fa-file-signature text-red-600 text-lg"
+                ></i>
+
                 <div>
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Document Preview</span>
-                    <span class="text-xs text-gray-400">Application Form CEF-1</span>
+
+                    <span
+                        class="text-xs font-bold text-gray-500 uppercase tracking-wider block"
+                    >
+                        Fill & Sign
+                    </span>
+
+                    <span class="text-xs text-gray-400">
+                        Application Form CEF-1
+                    </span>
+
                 </div>
+
             </div>
-            
-            <!-- Direct Download Action -->
-            <a href="{% static 'docs/com_res_11177_annexA.pdf' %}" download class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold rounded-lg transition shadow-sm gap-1.5 w-full sm:w-auto">
-                <i class="fa-solid fa-file-arrow-down"></i> Download Blank Form (CEF-1)
-            </a>
-        </div>
-        
-        <!-- Interactive PDF Container -->
-        <div class="flex-grow w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-            <object 
-                data="{% static 'docs/com_res_11177_annexA.pdf' %}#toolbar=1" 
-                type="application/pdf" 
-                class="w-full h-full"
+
+
+            <!-- BLANK FORM -->
+
+            <a
+                href="{% static 'docs/com_res_11177_annexA.pdf' %}"
+                download
+                class="inline-flex items-center justify-center px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white text-xs font-bold rounded-lg transition shadow-sm gap-1.5 w-full sm:w-auto"
             >
-                <!-- Fallback view if browser cannot render PDFs inline -->
-                <div class="flex flex-col items-center justify-center h-full p-6 text-center bg-gray-50">
-                    <i class="fa-regular fa-file-pdf text-5xl text-gray-400 mb-3"></i>
-                    <p class="text-sm font-medium text-gray-800">PDF Preview Unavailable</p>
-                    <p class="text-xs text-gray-500 max-w-xs mt-1 mb-4">Your device doesn't support viewing PDFs directly inside the browser. You can still download the blank document below to print or fill it out manually.</p>
-                    <a href="{% static 'docs/com_res_11177_annexA.pdf' %}" class="px-5 py-2.5 bg-blue-800 text-white font-bold text-xs rounded-lg hover:bg-blue-900 transition shadow-sm">
-                        <i class="fa-solid fa-download mr-1"></i> Get CEF-1 Form
-                    </a>
-                </div>
-            </object>
+
+                <i class="fa-solid fa-file-arrow-down"></i>
+
+                Blank Form
+
+            </a>
+
         </div>
+
+
+        <!-- ================================================
+             TOOLBAR
+        ================================================= -->
+
+        <div
+            id="pdfToolbar"
+            class="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3 flex flex-wrap gap-2"
+        >
+
+            <!-- SELECT -->
+
+            <button
+                type="button"
+                data-tool="select"
+                class="pdf-tool active-tool"
+            >
+
+                <i class="fa-solid fa-arrow-pointer"></i>
+
+                Select
+
+            </button>
+
+
+            <!-- TEXT -->
+
+            <button
+                type="button"
+                data-tool="text"
+                class="pdf-tool"
+            >
+
+                <i class="fa-solid fa-font"></i>
+
+                Text
+
+            </button>
+
+
+            <!-- CHECK -->
+
+            <button
+                type="button"
+                data-tool="check"
+                class="pdf-tool"
+            >
+
+                <i class="fa-solid fa-check"></i>
+
+                Check
+
+            </button>
+
+
+            <!-- CROSS -->
+
+            <button
+                type="button"
+                data-tool="cross"
+                class="pdf-tool"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+                X
+
+            </button>
+
+
+            <!-- DATE -->
+
+            <button
+                type="button"
+                data-tool="date"
+                class="pdf-tool"
+            >
+
+                <i class="fa-regular fa-calendar"></i>
+
+                Date
+
+            </button>
+
+
+            <!-- SIGNATURE -->
+
+            <button
+                type="button"
+                data-tool="signature"
+                class="pdf-tool"
+            >
+
+                <i class="fa-solid fa-signature"></i>
+
+                Signature
+
+            </button>
+
+
+            <!-- DELETE -->
+
+            <button
+                type="button"
+                id="deleteElement"
+                class="pdf-tool text-red-600"
+            >
+
+                <i class="fa-solid fa-trash"></i>
+
+                Delete
+
+            </button>
+
+        </div>
+
+
+        <!-- ================================================
+             PDF CONTAINER
+        ================================================= -->
+
+        <div
+            class="flex-grow w-full bg-gray-200 rounded-lg overflow-auto border border-gray-200"
+            id="pdfEditor"
+        >
+
+            <div
+                id="pdfPages"
+                class="flex flex-col items-center gap-6 py-6 px-3"
+            ></div>
+
+        </div>
+
     </div>
-    
+
 </div>
 
-<!-- Updated JavaScript to handle both distinct drop zones cleanly -->
+
+<!-- =========================================================
+     SIGNATURE MODAL
+========================================================= -->
+
+<div
+    id="signatureModal"
+    class="hidden fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4"
+>
+
+    <div
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-5"
+    >
+
+        <!-- HEADER -->
+
+        <div class="flex items-center justify-between mb-2">
+
+            <div>
+
+                <h2 class="text-lg font-bold text-gray-900">
+                    Add Signature
+                </h2>
+
+                <p class="text-xs text-gray-500">
+                    Draw your signature below.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                id="closeSignature"
+                class="w-8 h-8 rounded-lg hover:bg-gray-100 text-gray-500"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        <!-- CANVAS -->
+
+        <div
+            class="border-2 border-gray-200 rounded-xl bg-white overflow-hidden mt-4"
+        >
+
+            <canvas
+                id="signatureCanvas"
+                width="800"
+                height="300"
+                class="w-full touch-none"
+            ></canvas>
+
+        </div>
+
+
+        <!-- BUTTONS -->
+
+        <div
+            class="flex justify-between items-center mt-4 gap-3"
+        >
+
+            <button
+                type="button"
+                id="clearSignature"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50"
+            >
+
+                Clear
+
+            </button>
+
+
+            <div class="flex gap-2">
+
+                <button
+                    type="button"
+                    id="cancelSignature"
+                    class="px-4 py-2 bg-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-300"
+                >
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="applySignature"
+                    class="px-4 py-2 bg-blue-800 text-white rounded-lg text-sm font-semibold hover:bg-blue-900"
+                >
+
+                    Apply Signature
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PDF URL
+========================================================= -->
+
 <script>
-    function updateFileList(inputId, containerId, listId) {
-        const input = document.getElementById(inputId);
-        const container = document.getElementById(containerId);
-        const list = document.getElementById(listId);
-        
-        list.innerHTML = '';
-        if (input.files.length > 0) {
-            container.classList.remove('hidden');
-            for (let i = 0; i < input.files.length; i++) {
-                const li = document.createElement('li');
-                li.textContent = `${input.files[i].name} (${(input.files[i].size/1024/1024).toFixed(2)} MB)`;
-                list.appendChild(li);
-            }
-        } else {
-            container.classList.add('hidden');
-        }
-    }
+
+    /*
+     * The official CEF-1 PDF.
+     *
+     * This is the source PDF used by the editor.
+     * The applicant does NOT need to upload it.
+     */
+
+    window.PDF_URL =
+        "{% static 'docs/com_res_11177_annexA.pdf' %}";
+
 </script>
+
+
+<!-- =========================================================
+     PDF EDITOR JAVASCRIPT
+========================================================= -->
+
+<script
+    type="module"
+    src="{% static 'js/pdf-editor.js' %}"
+></script>
+
+
+<!-- =========================================================
+     SUPPORTING FILE LIST + FORM SUBMISSION
+========================================================= -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        /* =====================================================
+           ELEMENTS
+        ===================================================== */
+
+        const applicationForm =
+            document.getElementById(
+                "applicationForm"
+            );
+
+        const pdfElementsInput =
+            document.getElementById(
+                "pdfElements"
+            );
+
+        const submitButton =
+            document.getElementById(
+                "submitApplication"
+            );
+
+        const submitText =
+            document.getElementById(
+                "submitText"
+            );
+
+        const pdfSaveStatus =
+            document.getElementById(
+                "pdfSaveStatus"
+            );
+
+
+        /* =====================================================
+           FORM SUBMIT
+        ===================================================== */
+
+        if (applicationForm) {
+
+            applicationForm.addEventListener(
+                "submit",
+                function (event) {
+
+                    /*
+                     * Give pdf-editor.js an opportunity to
+                     * synchronize its internal state.
+                     *
+                     * We support several possible function
+                     * names so this template can work with
+                     * the editor implementation.
+                     */
+
+                    try {
+
+                        if (
+                            typeof window.savePdfElements ===
+                            "function"
+                        ) {
+
+                            window.savePdfElements();
+
+                        }
+
+                        else if (
+                            typeof window.updatePdfElementsInput ===
+                            "function"
+                        ) {
+
+                            window.updatePdfElementsInput();
+
+                        }
+
+                        else if (
+                            typeof window.syncPdfElements ===
+                            "function"
+                        ) {
+
+                            window.syncPdfElements();
+
+                        }
+
+                    }
+
+                    catch (error) {
+
+                        console.error(
+                            "PDF synchronization error:",
+                            error
+                        );
+
+                    }
+
+
+                    /* =========================================
+                       READ FINAL PDF DATA
+                    ========================================= */
+
+                    let pdfElements = [];
+
+                    try {
+
+                        pdfElements =
+                            JSON.parse(
+                                pdfElementsInput.value ||
+                                "[]"
+                            );
+
+                    }
+
+                    catch (error) {
+
+                        console.error(
+                            "Invalid PDF element JSON:",
+                            error
+                        );
+
+                        pdfElements = [];
+
+                    }
+
+
+                    console.log(
+                        "======================================"
+                    );
+
+                    console.log(
+                        "CEF-1 FORM SUBMISSION"
+                    );
+
+                    console.log(
+                        "PDF Elements:",
+                        pdfElements
+                    );
+
+                    console.log(
+                        "PDF Element Count:",
+                        pdfElements.length
+                    );
+
+                    console.log(
+                        "Raw PDF Elements:",
+                        pdfElementsInput.value
+                    );
+
+                    console.log(
+                        "======================================"
+                    );
+
+
+                    /*
+                     * If there are no elements, don't stop the
+                     * form automatically.
+                     *
+                     * The applicant may legitimately submit a
+                     * form containing only the original PDF.
+                     *
+                     * However, show a warning in the console.
+                     */
+
+                    if (
+                        pdfElements.length === 0
+                    ) {
+
+                        console.warn(
+                            "WARNING: No PDF editor elements were saved."
+                        );
+
+                    }
+
+
+                    /* =========================================
+                       VISUAL SUBMIT STATE
+                    ========================================= */
+
+                    if (submitButton) {
+
+                        submitButton.disabled = true;
+
+                    }
+
+                    if (submitText) {
+
+                        submitText.textContent =
+                            "Processing Application...";
+
+                    }
+
+                    if (pdfSaveStatus) {
+
+                        pdfSaveStatus.classList.add(
+                            "show"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SUPPORTING FILE LIST
+========================================================= */
+
+function updateFileList(
+    inputId,
+    containerId,
+    listId
+) {
+
+    const input =
+        document.getElementById(
+            inputId
+        );
+
+    const container =
+        document.getElementById(
+            containerId
+        );
+
+    const list =
+        document.getElementById(
+            listId
+        );
+
+
+    if (
+        !input ||
+        !container ||
+        !list
+    ) {
+
+        return;
+
+    }
+
+
+    list.innerHTML = "";
+
+
+    if (
+        input.files &&
+        input.files.length > 0
+    ) {
+
+        container.classList.remove(
+            "hidden"
+        );
+
+
+        let totalSize = 0;
+
+
+        for (
+            let i = 0;
+            i < input.files.length;
+            i++
+        ) {
+
+            const file =
+                input.files[i];
+
+
+            totalSize +=
+                file.size;
+
+
+            const li =
+                document.createElement(
+                    "li"
+                );
+
+
+            li.textContent =
+                `${file.name} ` +
+                `(${(
+                    file.size /
+                    1024 /
+                    1024
+                ).toFixed(2)} MB)`;
+
+
+            list.appendChild(
+                li
+            );
+
+        }
+
+
+        /*
+         * Display total attachment size.
+         */
+
+        const totalLi =
+            document.createElement(
+                "li"
+            );
+
+
+        totalLi.className =
+            "list-none mt-2 pt-2 border-t border-blue-200 font-bold text-blue-800";
+
+
+        totalLi.textContent =
+            `Total: ${(
+                totalSize /
+                1024 /
+                1024
+            ).toFixed(2)} MB`;
+
+
+        list.appendChild(
+            totalLi
+        );
+
+
+        /*
+         * 10 MB frontend warning.
+         */
+
+        if (
+            totalSize >
+            10 * 1024 * 1024
+        ) {
+
+            totalLi.classList.remove(
+                "text-blue-800"
+            );
+
+            totalLi.classList.add(
+                "text-red-600"
+            );
+
+            totalLi.textContent +=
+                " — exceeds 10 MB limit";
+
+        }
+
+    }
+
+    else {
+
+        container.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+</script>
+
+
 {% endblock %}

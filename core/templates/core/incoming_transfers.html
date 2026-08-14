@@ -78,7 +78,7 @@
                 <thead>
                     <tr class="bg-gray-50 text-[10px] font-bold tracking-wider uppercase text-gray-500 border-b border-gray-200">
                         <th class="px-6 py-3.5">Full Name</th>
-                        <th class="px-6 py-3.5">Previous & Target Address</th>
+                        {% comment %} <th class="px-6 py-3.5">Previous & Target Address</th> {% endcomment %}
                         <th class="px-6 py-3.5">Contact Number</th>
                         <th class="px-6 py-3.5">Transfer Document</th>
                         <th class="px-6 py-3.5 text-right">Transfer Actions</th>
@@ -100,12 +100,12 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
+                        {% comment %} <td class="px-6 py-4">
                             <div class="max-w-[220px] truncate text-xs text-gray-600">
                                 <p class="font-bold text-gray-900 leading-tight">{{ resident.previous_address }}</p>
                                 <span class="text-[10px] font-medium text-indigo-600">Moving to: {{ resident.target_barangay }}</span>
                             </div>
-                        </td>
+                        </td> {% endcomment %}
                         <td class="px-6 py-4">
                             <span class="font-mono text-xs text-gray-600 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-200/50">
                                 {{ resident.contact_number }}

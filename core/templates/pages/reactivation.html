@@ -2,155 +2,1636 @@
 {% load static %}
 
 {% block content %}
-<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-200 pb-4">
-    <div>
-        <a href="{% url 'home' %}" class="text-sm font-semibold text-blue-800 hover:text-blue-900 inline-flex items-center gap-2 mb-2">
-            <i class="fa-solid fa-arrow-left"></i> Back to Services
-        </a>
-        <h2 class="text-2xl font-black tracking-tight text-gray-900">Reactivation of Registration Record</h2>
-        <p class="text-sm text-gray-600">Submit an application to reinstate your name on the active voter list of Pio Duran.</p>
-    </div>
-</div>
 
-<!-- Two-Column Workspace -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-    
-    <!-- LEFT SIDE: Submission Form (Takes 5 columns) -->
-    <div class="lg:col-span-5 bg-white p-6 rounded-xl border border-gray-200 shadow-sm order-2 lg:order-1">
-        <div class="mb-5">
-            <span class="text-xs font-bold text-amber-600 uppercase tracking-wider inline-flex items-center gap-1.5">
-                <i class="fa-solid fa-shield-halved"></i> Secure Portal
-            </span>
-            <h3 class="text-lg font-bold text-gray-900 mt-1">Submit Reactivation Form</h3>
-        </div>
+<style>
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-5">
-            {% csrf_token %}
-            
-            <!-- Applicant Details Section -->
-            <div class="space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-700">Full Name (As previously registered)</label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm">
-                        <i class="fa-solid fa-user"></i>
-                    </span>
-                    <input 
-                        type="text" 
-                        name="full_name" 
-                        required 
-                        placeholder="Juan Dela Cruz"
-                        class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800 transition"
-                    >
-                </div>
-            </div>
+/* =========================================================
+   PDF EDITOR
+========================================================= */
 
-            <!-- Professional File Upload Zone -->
-            <div class="space-y-2">
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-700">Upload Filled Form & Identification</label>
-                <div class="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-xl p-6 text-center transition bg-gray-50 group relative cursor-pointer">
-                    <input 
-                        type="file" 
-                        name="application_files" 
-                        multiple 
-                        required 
-                        id="fileInput"
-                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        onchange="updateFileList()"
-                    >
-                    <div class="space-y-2 pointer-events-none">
-                        <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 group-hover:text-blue-800 transition-colors"></i>
-                        <p class="text-sm font-semibold text-gray-700">Drag files here or click to browse</p>
-                        <p class="text-xs text-gray-400">Attach your completed CEF-1 form along with a valid Government ID (PDF or ZIP, Max 10MB)</p>
-                    </div>
-                </div>
-                <!-- Interactive Dynamic File List -->
-                <div id="fileListContainer" class="hidden mt-2 p-3 bg-blue-50 text-blue-950 text-xs rounded-lg border border-blue-100">
-                    <p class="font-bold mb-1"><i class="fa-solid fa-paperclip mr-1"></i> Ready to Upload:</p>
-                    <ul id="fileList" class="list-disc pl-4 space-y-0.5 text-gray-700"></ul>
-                </div>
-            </div>
+#pdfEditor {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: #e5e7eb;
+}
 
-            <!-- Attestation Checkbox -->
-            <div class="flex items-start gap-3 pt-2">
-                <input 
-                    type="checkbox" 
-                    name="agreement" 
-                    id="agreement" 
-                    required
-                    class="w-4 h-4 rounded text-blue-800 focus:ring-blue-800 mt-0.5 border-gray-300"
-                >
-                <label for="agreement" class="text-xs text-gray-600 leading-normal select-none">
-                    I certify under penalty of perjury that I am the individual previously registered under this record and that I am requesting the reactivation of my registration details.
-                </label>
-            </div>
+#pdfPages {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 10px;
+    box-sizing: border-box;
+}
 
-            <!-- Submit Button -->
-            <button 
-                type="submit" 
-                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-500 hover:bg-amber-600 text-blue-950 font-extrabold text-sm tracking-wide uppercase rounded-xl shadow transition duration-150 transform hover:-translate-y-0.5"
-            >
-                <i class="fa-solid fa-user-check"></i> Transmit Reactivation Request
-            </button>
-        </form>
-    </div>
+.pdf-page {
+    position: relative;
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 
-    <!-- RIGHT SIDE: PDF Viewer & Direct Download (Takes 7 columns) -->
-    <div class="lg:col-span-7 bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col h-[650px] order-1 lg:order-2">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 px-1">
-            <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-file-pdf text-red-600 text-lg"></i>
-                <div>
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Document Preview</span>
-                    <span class="text-xs text-gray-400">Application for Reactivation (CEF-1)</span>
-                </div>
-            </div>
-            
-            <!-- Direct Download Action -->
-            <a href="{% static 'docs/Request_for_Reactivation_Pioduran_Online_Registration.pdf' %}" download class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold rounded-lg transition shadow-sm gap-1.5 w-full sm:w-auto">
-                <i class="fa-solid fa-file-arrow-down"></i> Download Blank Form (CEF-1)
-            </a>
-        </div>
-        
-        <!-- Interactive PDF Container -->
-        <div class="flex-grow w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-            <object 
-                data="{% static 'docs/Request_for_Reactivation_Pioduran_Online_Registration.pdf' %}#toolbar=1" 
-                type="application/pdf" 
-                class="w-full h-full"
-            >
-                <!-- Fallback view if browser cannot render PDFs inline -->
-                <div class="flex flex-col items-center justify-center h-full p-6 text-center bg-gray-50">
-                    <i class="fa-regular fa-file-pdf text-5xl text-gray-400 mb-3"></i>
-                    <p class="text-sm font-medium text-gray-800">PDF Preview Unavailable</p>
-                    <p class="text-xs text-gray-500 max-w-xs mt-1 mb-4">Your device doesn't support viewing PDFs directly inside the browser. You can download the form below to proceed with your reactivation application.</p>
-                    <a href="{% static 'docs/cef1.pdf' %}" class="px-5 py-2.5 bg-blue-800 text-white font-bold text-xs rounded-lg hover:bg-blue-900 transition shadow-sm">
-                        <i class="fa-solid fa-download mr-1"></i> Get CEF-1 Form
-                    </a>
-                </div>
-            </object>
-        </div>
-    </div>
-    
-</div>
+    width: 100% !important;
+    max-width: 850px;
 
-<!-- Simple inline script to manage file feedback -->
-<script>
-    function updateFileList() {
-        const input = document.getElementById('fileInput');
-        const container = document.getElementById('fileListContainer');
-        const list = document.getElementById('fileList');
-        
-        list.innerHTML = '';
-        if (input.files.length > 0) {
-            container.classList.remove('hidden');
-            for (let i = 0; i < input.files.length; i++) {
-                const li = document.createElement('li');
-                li.textContent = `${input.files[i].name} (${(input.files[i].size/1024/1024).toFixed(2)} MB)`;
-                list.appendChild(li);
-            }
-        } else {
-            container.classList.add('hidden');
-        }
+    height: auto;
+
+    flex-shrink: 0;
+}
+
+.pdf-canvas {
+    display: block;
+
+    width: 100%;
+    height: auto;
+
+    max-width: 100%;
+}
+
+.pdf-element-layer {
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+}
+
+.pdf-element {
+    position: absolute;
+
+    pointer-events: auto;
+
+    cursor: move;
+
+    user-select: none;
+
+    z-index: 20;
+}
+
+.pdf-element:hover {
+    outline: 1px dashed #2563eb;
+}
+
+.selected-element {
+    outline: 2px solid #2563eb !important;
+    outline-offset: 1px;
+}
+
+
+/* =========================================================
+   TEXT
+========================================================= */
+
+.text-element {
+    background: rgba(255,255,255,0.80);
+
+    padding: 2px 4px;
+
+    min-width: 20px;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 14px;
+
+    line-height: 1.2;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   CHECK
+========================================================= */
+
+.check-element {
+    font-size: 22px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    background: rgba(255,255,255,0.25);
+}
+
+
+/* =========================================================
+   CROSS
+========================================================= */
+
+.cross-element {
+    font-size: 22px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    background: rgba(255,255,255,0.25);
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+.date-element {
+    background: rgba(255,255,255,0.80);
+
+    padding: 2px 4px;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SIGNATURE
+========================================================= */
+
+.signature-element {
+    background: rgba(255,255,255,0.25);
+
+    overflow: hidden;
+}
+
+.signature-element img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    display: block;
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.pdf-tool {
+    padding: 7px 11px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    background: white;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    color: #334155;
+
+    transition: all 0.15s ease;
+}
+
+.pdf-tool:hover {
+    background: #f1f5f9;
+
+    border-color: #94a3b8;
+}
+
+.active-tool {
+    background: #1e40af !important;
+
+    color: white !important;
+
+    border-color: #1e40af !important;
+}
+
+
+/* =========================================================
+   SIGNATURE CANVAS
+========================================================= */
+
+#signatureCanvas {
+    display: block;
+
+    width: 100%;
+
+    height: 250px;
+
+    cursor: crosshair;
+
+    background: white;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+#pdfSaveStatus {
+    display: none;
+}
+
+#pdfSaveStatus.show {
+    display: flex;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width:768px) {
+
+    #pdfEditor {
+        min-height: 500px;
     }
+
+    #pdfPages {
+        padding: 12px 5px;
+    }
+
+    .pdf-tool {
+        padding: 6px 9px;
+
+        font-size: 11px;
+    }
+
+}
+
+</style>
+
+
+<!-- =========================================================
+     PAGE HEADER
+========================================================= -->
+
+<div
+    class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-200 pb-4"
+>
+
+    <div>
+
+        <a
+            href="{% url 'home' %}"
+            class="text-sm font-semibold text-blue-800 hover:text-blue-900 inline-flex items-center gap-2 mb-2"
+        >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Back to Services
+
+        </a>
+
+
+        <h2 class="text-2xl font-black tracking-tight text-gray-900">
+
+            Reactivation of Registration Record
+
+        </h2>
+
+
+        <p class="text-sm text-gray-600">
+
+            Complete and sign your application to reinstate your
+            registration record.
+
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     WORKSPACE
+========================================================= -->
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+
+<!-- =========================================================
+     LEFT
+========================================================= -->
+
+<div
+    class="lg:col-span-5 bg-white p-6 rounded-xl border border-gray-200 shadow-sm order-2 lg:order-1"
+>
+
+    <div class="mb-5">
+
+        <span
+            class="text-xs font-bold text-amber-600 uppercase tracking-wider inline-flex items-center gap-1.5"
+        >
+
+            <i class="fa-solid fa-shield-halved"></i>
+
+            Secure Portal
+
+        </span>
+
+
+        <h3 class="text-lg font-bold text-gray-900 mt-1">
+
+            Submit Reactivation Form
+
+        </h3>
+
+
+        <p class="text-xs text-gray-500 mt-1">
+
+            Complete the application form and upload
+            your supporting identification document.
+
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         FORM
+    ====================================================== -->
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+        id="reactivationForm"
+        class="space-y-5"
+    >
+
+        {% csrf_token %}
+
+
+        <!-- =================================================
+             FULL NAME
+        ================================================== -->
+
+        <div class="space-y-3">
+
+            <label
+                for="fullName"
+                class="block text-xs font-bold uppercase tracking-wide text-gray-700"
+            >
+
+                Full Name
+
+            </label>
+
+
+            <div class="relative">
+
+                <span
+                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm"
+                >
+
+                    <i class="fa-solid fa-user"></i>
+
+                </span>
+
+
+                <input
+                    type="text"
+                    name="full_name"
+                    id="fullName"
+                    required
+                    autocomplete="name"
+                    placeholder="Juan Dela Cruz"
+                    class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800 transition"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             CONTACT NUMBER
+        ================================================== -->
+
+        <div class="space-y-3">
+
+            <label
+                for="contactNumber"
+                class="block text-xs font-bold uppercase tracking-wide text-gray-700"
+            >
+
+                Contact / Mobile Number
+
+            </label>
+
+
+            <div
+                class="relative flex rounded-lg border border-gray-300 focus-within:ring-2 focus-within:ring-blue-800 focus-within:border-blue-800 transition overflow-hidden"
+            >
+
+                <span
+                    class="inline-flex items-center px-3 bg-gray-50 border-r border-gray-300 text-gray-500 text-xs font-semibold font-mono select-none"
+                >
+
+                    +63
+
+                </span>
+
+
+                <span
+                    class="absolute inset-y-0 left-14 flex items-center text-gray-400 text-sm pointer-events-none"
+                >
+
+                    <i class="fa-solid fa-phone"></i>
+
+                </span>
+
+
+                <input
+                    type="tel"
+                    name="contact_number"
+                    id="contactNumber"
+                    required
+                    maxlength="10"
+                    minlength="10"
+                    placeholder="9123456789"
+                    pattern="9[0-9]{9}"
+                    inputmode="numeric"
+                    autocomplete="tel"
+                    title="Please enter a valid 10-digit mobile number starting with 9"
+                    class="w-full pl-9 pr-3 py-2 text-sm focus:outline-none"
+                >
+
+            </div>
+
+
+            <p class="text-[10px] text-gray-400">
+
+                Example: 9123456789
+
+            </p>
+
+        </div>
+
+
+        <!-- =================================================
+             APPLICATION FORM
+        ================================================== -->
+
+        <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
+
+            <div class="flex items-start gap-3">
+
+                <div
+                    class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0"
+                >
+
+                    <i class="fa-solid fa-file-pdf"></i>
+
+                </div>
+
+
+                <div>
+
+                    <p class="text-sm font-bold text-gray-900">
+
+                        Reactivation Application Form
+
+                    </p>
+
+
+                    <p class="text-xs text-gray-600 mt-1 leading-relaxed">
+
+                        The official Reactivation application form
+                        is loaded in the Fill & Sign editor.
+
+                    </p>
+
+
+                    <div
+                        class="flex items-center gap-1.5 text-[11px] text-green-700 font-semibold mt-2"
+                    >
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        <span>
+
+                            Fill & Sign enabled
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             PDF STATUS
+        ================================================== -->
+
+        <div
+            id="pdfSaveStatus"
+            class="items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-800"
+        >
+
+            <i class="fa-solid fa-circle-check"></i>
+
+            <span id="pdfStatusText">
+
+                Form fields are ready.
+
+            </span>
+
+        </div>
+
+
+        <!-- =================================================
+             SUPPORTING DOCUMENT
+        ================================================== -->
+
+        <div class="space-y-2">
+
+            <label
+                for="supportFileInput"
+                class="block text-xs font-bold uppercase tracking-wide text-gray-700"
+            >
+
+                Supporting Identification Document
+
+            </label>
+
+
+            <div
+                class="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-xl p-5 text-center transition bg-gray-50 group relative cursor-pointer"
+            >
+
+                <input
+                    type="file"
+                    name="document"
+                    multiple
+                    required
+                    id="supportFileInput"
+                    accept=".pdf,.jpg,.jpeg,.png,.zip"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                >
+
+
+                <div class="space-y-1.5 pointer-events-none">
+
+                    <i
+                        class="fa-solid fa-file-shield text-2xl text-gray-400 group-hover:text-blue-800 transition-colors"
+                    ></i>
+
+
+                    <p class="text-xs font-bold text-gray-700">
+
+                        Upload ID or supporting document
+
+                    </p>
+
+
+                    <p class="text-[10px] text-gray-400">
+
+                        PDF, ZIP, JPG, JPEG, or PNG
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="fileListContainer"
+                class="hidden mt-2 p-2.5 bg-blue-50 text-blue-950 text-xs rounded-lg border border-blue-100"
+            >
+
+                <p class="font-bold mb-1">
+
+                    <i class="fa-solid fa-paperclip mr-1"></i>
+
+                    Attachments Ready:
+
+                </p>
+
+
+                <ul
+                    id="fileList"
+                    class="list-disc pl-4 space-y-0.5 text-gray-700 font-mono text-[11px]"
+                ></ul>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             AGREEMENT
+        ================================================== -->
+
+        <div class="flex items-start gap-3 pt-2">
+
+            <input
+                type="checkbox"
+                name="agreement"
+                id="agreement"
+                required
+                class="w-4 h-4 rounded text-blue-800 focus:ring-blue-800 mt-0.5 border-gray-300"
+            >
+
+
+            <label
+                for="agreement"
+                class="text-xs text-gray-600 leading-normal select-none"
+            >
+
+                I certify under penalty of perjury that I am the
+                individual previously registered under this record
+                and that I am requesting the reactivation of my
+                registration details.
+
+            </label>
+
+        </div>
+
+
+        <!-- =================================================
+             PDF ELEMENTS
+        ================================================== -->
+
+        <input
+            type="hidden"
+            name="pdf_elements"
+            id="pdfElements"
+            value="[]"
+        >
+
+
+        <!-- =================================================
+             SUBMIT
+        ================================================== -->
+
+        <button
+            type="submit"
+            id="submitApplication"
+            class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-500 hover:bg-amber-600 text-blue-950 font-extrabold text-sm tracking-wide uppercase rounded-xl shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+
+            <i class="fa-solid fa-user-check"></i>
+
+
+            <span id="submitText">
+
+                Transmit Reactivation Request
+
+            </span>
+
+        </button>
+
+    </form>
+
+</div>
+
+
+<!-- =========================================================
+     RIGHT PDF EDITOR
+========================================================= -->
+
+<div
+    class="lg:col-span-7 bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col h-[760px] order-1 lg:order-2"
+>
+
+    <div
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 px-1"
+    >
+
+        <div class="flex items-center gap-1.5">
+
+            <i
+                class="fa-solid fa-file-signature text-red-600 text-lg"
+            ></i>
+
+
+            <div>
+
+                <span
+                    class="text-xs font-bold text-gray-500 uppercase tracking-wider block"
+                >
+
+                    Fill & Sign
+
+                </span>
+
+
+                <span class="text-xs text-gray-400">
+
+                    Application for Reactivation
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <a
+            href="{% static 'docs/Request_for_Reactivation_Pioduran_Online_Registration.pdf' %}"
+            download
+            class="inline-flex items-center justify-center px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white text-xs font-bold rounded-lg transition shadow-sm gap-1.5 w-full sm:w-auto"
+        >
+
+            <i class="fa-solid fa-file-arrow-down"></i>
+
+            Blank Form
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         TOOLBAR
+    ====================================================== -->
+
+    <div
+        id="pdfToolbar"
+        class="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3 flex flex-wrap gap-2"
+    >
+
+        <button
+            type="button"
+            data-tool="select"
+            class="pdf-tool active-tool"
+        >
+
+            <i class="fa-solid fa-arrow-pointer"></i>
+
+            Select
+
+        </button>
+
+
+        <button
+            type="button"
+            data-tool="text"
+            class="pdf-tool"
+        >
+
+            <i class="fa-solid fa-font"></i>
+
+            Text
+
+        </button>
+
+
+        <button
+            type="button"
+            data-tool="check"
+            class="pdf-tool"
+        >
+
+            <i class="fa-solid fa-check"></i>
+
+            Check
+
+        </button>
+
+
+        <button
+            type="button"
+            data-tool="cross"
+            class="pdf-tool"
+        >
+
+            <i class="fa-solid fa-xmark"></i>
+
+            X
+
+        </button>
+
+
+        <button
+            type="button"
+            data-tool="date"
+            class="pdf-tool"
+        >
+
+            <i class="fa-regular fa-calendar"></i>
+
+            Date
+
+        </button>
+
+
+        <button
+            type="button"
+            data-tool="signature"
+            class="pdf-tool"
+        >
+
+            <i class="fa-solid fa-signature"></i>
+
+            Signature
+
+        </button>
+
+
+        <button
+            type="button"
+            id="deleteElement"
+            class="pdf-tool text-red-600"
+        >
+
+            <i class="fa-solid fa-trash"></i>
+
+            Delete
+
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         PDF
+    ====================================================== -->
+
+    <div
+        class="flex-grow w-full bg-gray-200 rounded-lg overflow-auto border border-gray-200"
+        id="pdfEditor"
+    >
+
+        <div
+            id="pdfPages"
+            class="flex flex-col items-center gap-6 py-6 px-3"
+        ></div>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<!-- =========================================================
+     SIGNATURE MODAL
+========================================================= -->
+
+<div
+    id="signatureModal"
+    class="hidden fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4"
+>
+
+    <div
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-5"
+    >
+
+        <div class="flex items-center justify-between mb-2">
+
+            <div>
+
+                <h2 class="text-lg font-bold text-gray-900">
+
+                    Add Signature
+
+                </h2>
+
+
+                <p class="text-xs text-gray-500">
+
+                    Draw your signature below.
+
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="closeSignature"
+                class="w-8 h-8 rounded-lg hover:bg-gray-100 text-gray-500"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        <div
+            class="border-2 border-gray-200 rounded-xl bg-white overflow-hidden mt-4"
+        >
+
+            <canvas
+                id="signatureCanvas"
+                width="800"
+                height="300"
+                class="w-full touch-none"
+            ></canvas>
+
+        </div>
+
+
+        <div class="flex justify-between items-center mt-4 gap-3">
+
+            <button
+                type="button"
+                id="clearSignature"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50"
+            >
+
+                Clear
+
+            </button>
+
+
+            <div class="flex gap-2">
+
+                <button
+                    type="button"
+                    id="cancelSignature"
+                    class="px-4 py-2 bg-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-300"
+                >
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="applySignature"
+                    class="px-4 py-2 bg-blue-800 text-white rounded-lg text-sm font-semibold hover:bg-blue-900"
+                >
+
+                    Apply Signature
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PDF URL
+========================================================= -->
+
+<script>
+
+window.PDF_URL =
+    "{% static 'docs/Request_for_Reactivation_Pioduran_Online_Registration.pdf' %}";
+
 </script>
+
+
+<!-- =========================================================
+     PDF EDITOR
+========================================================= -->
+
+<script
+    type="module"
+    src="{% static 'js/pdf-editor.js' %}"
+></script>
+
+
+<!-- =========================================================
+     REACTIVATION JAVASCRIPT
+========================================================= -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    "use strict";
+
+    const form =
+        document.getElementById("reactivationForm");
+
+    const pdfInput =
+        document.getElementById("pdfElements");
+
+    const fileInput =
+        document.getElementById("supportFileInput");
+
+    const fileContainer =
+        document.getElementById("fileListContainer");
+
+    const fileList =
+        document.getElementById("fileList");
+
+    const submitButton =
+        document.getElementById("submitApplication");
+
+    const submitText =
+        document.getElementById("submitText");
+
+    const pdfStatus =
+        document.getElementById("pdfSaveStatus");
+
+    const pdfStatusText =
+        document.getElementById("pdfStatusText");
+
+
+    // =========================================================
+    // GET PDF ELEMENTS DIRECTLY FROM THE EDITOR DOM
+    //
+    // IMPORTANT:
+    // We DO NOT modify pdf-editor.js.
+    //
+    // pdf-editor.js creates:
+    //
+    // .pdf-page
+    // .pdf-element
+    //
+    // We read those elements here and convert them into the
+    // exact JSON format expected by Django.
+    // =========================================================
+
+    function getEditorElements() {
+
+        const result = [];
+
+        const pages =
+            document.querySelectorAll(
+                "#pdfPages .pdf-page"
+            );
+
+
+        pages.forEach(function (page) {
+
+            const pageIndex =
+                Number(
+                    page.dataset.page
+                );
+
+
+            const pageWidth =
+                Number(
+                    page.dataset.pdfWidth
+                ) || 0;
+
+
+            const pageHeight =
+                Number(
+                    page.dataset.pdfHeight
+                ) || 0;
+
+
+            const scale =
+                Number(
+                    page.dataset.scale
+                ) || 1;
+
+
+            const layer =
+                page.querySelector(
+                    ".pdf-element-layer"
+                );
+
+
+            if (!layer) {
+                return;
+            }
+
+
+            const pageElements =
+                layer.querySelectorAll(
+                    ".pdf-element"
+                );
+
+
+            pageElements.forEach(function (element) {
+
+                const type =
+                    element.dataset.type || "";
+
+
+                const id =
+                    Number(
+                        element.dataset.id
+                    ) || 0;
+
+
+                // -------------------------------------------------
+                // POSITION
+                // -------------------------------------------------
+
+                const x =
+                    parseFloat(
+                        element.style.left
+                    ) || 0;
+
+
+                const y =
+                    parseFloat(
+                        element.style.top
+                    ) || 0;
+
+
+                // -------------------------------------------------
+                // SIZE
+                // -------------------------------------------------
+
+                const width =
+                    element.offsetWidth ||
+                    parseFloat(
+                        element.style.width
+                    ) ||
+                    0;
+
+
+                const height =
+                    element.offsetHeight ||
+                    parseFloat(
+                        element.style.height
+                    ) ||
+                    0;
+
+
+                // -------------------------------------------------
+                // VALUE
+                // -------------------------------------------------
+
+                let value = "";
+
+
+                if (
+                    type === "signature"
+                ) {
+
+                    const img =
+                        element.querySelector(
+                            "img"
+                        );
+
+
+                    if (img) {
+
+                        value =
+                            img.src || "";
+
+                    }
+
+                }
+
+                else {
+
+                    value =
+                        (
+                            element.textContent ||
+                            ""
+                        ).trim();
+
+                }
+
+
+                // -------------------------------------------------
+                // FONT SIZE
+                // -------------------------------------------------
+
+                let fontSize = 14;
+
+
+                if (
+                    type === "date"
+                ) {
+
+                    fontSize = 13;
+
+                }
+
+                else {
+
+                    const computedStyle =
+                        window.getComputedStyle(
+                            element
+                        );
+
+
+                    const parsedFontSize =
+                        parseFloat(
+                            computedStyle.fontSize
+                        );
+
+
+                    if (
+                        !isNaN(
+                            parsedFontSize
+                        )
+                    ) {
+
+                        fontSize =
+                            parsedFontSize;
+
+                    }
+
+                }
+
+
+                // -------------------------------------------------
+                // BUILD OBJECT
+                // -------------------------------------------------
+
+                const item = {
+
+                    id: id,
+
+                    type: type,
+
+                    // PDF pages are ZERO BASED
+                    page: pageIndex,
+
+                    x: x,
+
+                    y: y,
+
+                    width: width,
+
+                    height: height,
+
+                    value: value,
+
+                    text:
+                        (
+                            type === "text" ||
+                            type === "date"
+                        )
+                            ? value
+                            : "",
+
+                    image:
+                        type === "signature"
+                            ? value
+                            : "",
+
+                    fontSize: fontSize,
+
+                    pageWidth: pageWidth,
+
+                    pageHeight: pageHeight,
+
+                    scale: scale
+
+                };
+
+
+                result.push(item);
+
+            });
+
+        });
+
+
+        console.log(
+            "=========================================="
+        );
+
+        console.log(
+            "PDF ELEMENTS READ FROM DOM:"
+        );
+
+        console.log(
+            result
+        );
+
+        console.log(
+            "PDF ELEMENT COUNT:",
+            result.length
+        );
+
+        console.log(
+            "=========================================="
+        );
+
+
+        return result;
+    }
+
+
+    // =========================================================
+    // SYNCHRONIZE PDF ELEMENTS
+    // =========================================================
+
+    function syncPdfElements() {
+
+        if (!pdfInput) {
+
+            console.error(
+                "pdfElements input not found."
+            );
+
+            return [];
+
+        }
+
+
+        const elements =
+            getEditorElements();
+
+
+        pdfInput.value =
+            JSON.stringify(
+                elements
+            );
+
+
+        // -------------------------------------------------------
+        // STATUS
+        // -------------------------------------------------------
+
+        if (
+            elements.length > 0
+        ) {
+
+            if (pdfStatus) {
+
+                pdfStatus.classList.add(
+                    "show"
+                );
+
+            }
+
+
+            if (pdfStatusText) {
+
+                pdfStatusText.textContent =
+                    `${elements.length} form field${
+                        elements.length === 1
+                            ? ""
+                            : "s"
+                    } ready to submit.`;
+
+            }
+
+        }
+
+        else {
+
+            if (pdfStatus) {
+
+                pdfStatus.classList.remove(
+                    "show"
+                );
+
+            }
+
+        }
+
+
+        console.log(
+            "PDF ELEMENTS SYNC:",
+            elements
+        );
+
+
+        return elements;
+    }
+
+
+    // =========================================================
+    // MAKE AVAILABLE GLOBALLY
+    // =========================================================
+
+    window.syncReactivationPdf =
+        syncPdfElements;
+
+    window.savePdfElements =
+        syncPdfElements;
+
+    window.updatePdfElementsInput =
+        syncPdfElements;
+
+    window.syncPdfElements =
+        syncPdfElements;
+
+
+    // =========================================================
+    // FILE LIST
+    // =========================================================
+
+    if (fileInput) {
+
+        fileInput.addEventListener(
+            "change",
+            function () {
+
+                fileList.innerHTML = "";
+
+
+                if (
+                    !fileInput.files ||
+                    fileInput.files.length === 0
+                ) {
+
+                    fileContainer.classList.add(
+                        "hidden"
+                    );
+
+                    return;
+
+                }
+
+
+                fileContainer.classList.remove(
+                    "hidden"
+                );
+
+
+                let totalSize = 0;
+
+
+                Array.from(
+                    fileInput.files
+                ).forEach(function (file) {
+
+                    totalSize +=
+                        file.size;
+
+
+                    const li =
+                        document.createElement(
+                            "li"
+                        );
+
+
+                    li.textContent =
+                        `${file.name} (${(
+                            file.size /
+                            1024 /
+                            1024
+                        ).toFixed(2)} MB)`;
+
+
+                    fileList.appendChild(
+                        li
+                    );
+
+                });
+
+
+                const total =
+                    document.createElement(
+                        "li"
+                    );
+
+
+                total.className =
+                    "list-none mt-2 pt-2 border-t border-blue-200 font-bold";
+
+
+                total.textContent =
+                    `Total: ${(
+                        totalSize /
+                        1024 /
+                        1024
+                    ).toFixed(2)} MB`;
+
+
+                if (
+                    totalSize >
+                    10 * 1024 * 1024
+                ) {
+
+                    total.classList.add(
+                        "text-red-600"
+                    );
+
+                    total.textContent +=
+                        " — exceeds 10 MB limit";
+
+                }
+
+                else {
+
+                    total.classList.add(
+                        "text-blue-800"
+                    );
+
+                }
+
+
+                fileList.appendChild(
+                    total
+                );
+
+            }
+        );
+
+    }
+
+
+    // =========================================================
+    // PERIODIC SYNC
+    // =========================================================
+
+    // PDF editor is a module and may still be rendering.
+    // Give it time to create the pages/elements.
+
+    setTimeout(
+        syncPdfElements,
+        1000
+    );
+
+    setTimeout(
+        syncPdfElements,
+        2000
+    );
+
+    setTimeout(
+        syncPdfElements,
+        3000
+    );
+
+    setTimeout(
+        syncPdfElements,
+        5000
+    );
+
+
+    // =========================================================
+    // SUBMIT
+    // =========================================================
+
+    if (form) {
+
+        form.addEventListener(
+            "submit",
+            function (event) {
+
+                // IMPORTANT:
+                // Read the elements immediately before POST.
+
+                const elements =
+                    syncPdfElements();
+
+
+                console.log(
+                    "======================================"
+                );
+
+                console.log(
+                    "REACTIVATION FORM SUBMISSION"
+                );
+
+                console.log(
+                    "RAW PDF ELEMENTS:",
+                    pdfInput.value
+                );
+
+                console.log(
+                    "PARSED PDF ELEMENTS:",
+                    elements
+                );
+
+                console.log(
+                    "PDF ELEMENT COUNT:",
+                    elements.length
+                );
+
+                console.log(
+                    "======================================"
+                );
+
+
+                // Do not allow submission with an empty editor
+                // if the user actually placed something.
+
+                if (
+                    elements.length === 0
+                ) {
+
+                    console.warn(
+                        "No PDF elements detected."
+                    );
+
+                    // Do NOT block submission if the form
+                    // intentionally has no annotations.
+
+                }
+
+
+                if (submitButton) {
+
+                    submitButton.disabled =
+                        true;
+
+                }
+
+
+                if (submitText) {
+
+                    submitText.textContent =
+                        "Processing Application...";
+
+                }
+
+                // IMPORTANT:
+                // No event.preventDefault()
+                // The normal Django POST continues.
+
+            }
+        );
+
+    }
+
+});
+</script>
+
 {% endblock %}
